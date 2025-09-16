@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* Font Face Declarations */
+@font-face {
+  font-family: 'Tektur';
+  src: url('/fonts/tektur/Tektur-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tektur';
+  src: url('/fonts/tektur/Tektur-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tektur';
+  src: url('/fonts/tektur/Tektur-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tektur';
+  src: url('/fonts/tektur/Tektur-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  src: url('/fonts/space-mono/SpaceMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  src: url('/fonts/space-mono/SpaceMono-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  
+  /* Custom colors */
+  --color-ink: #08090A;
+  --color-stone: #A7A2A9;
+  --color-mist: #F4F7F5;
+  --color-slate: #575A5E;
+  --color-forest: #222823;
+  --color-flash-white:#E8E9EB;
+  --color-alabster:#E0DFD5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Custom colors */
+  --color-ink: var(--color-ink);
+  --color-stone: var(--color-stone);
+  --color-mist: var(--color-mist);
+  --color-slate: var(--color-slate);
+  --color-forest: var(--color-forest);
+  --color-flash-white: var(--color-flash-white);
+  --color-alabster: var(--color-alabster);
+  
+  /* Custom fonts */
+  --font-tektur: 'Tektur', sans-serif;
+  --font-space-mono: 'Space Mono', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #F4F7F5;
+    --foreground: #08090A;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif, 'Tektur', 'Space Mono';
+}
