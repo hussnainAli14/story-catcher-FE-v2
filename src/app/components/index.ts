@@ -6,3 +6,4 @@ export { default as Avatar } from "./Avatar";
 export { default as ChatBox } from "./ChatBox";
 export { default as ChatItem } from "./ChatItem";
 export { default as Chat } from "./Chat";
+export { default as Popup } from "./Popup";

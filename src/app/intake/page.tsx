@@ -1,0 +1,27 @@
+"use client"
+import React, { useState } from 'react'
+import { Chat, ChatInput, Header, Popup } from '../components'
+import { messages } from '@/utils/dummyData'
+
+const Intake = () => {
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    return (
+        <>
+       { isPopupOpen && <Popup />}
+        <div className="h-screen flex flex-col">
+          <Header />
+          <button onClick={() => setIsPopupOpen(true)}>Open Popup</button>
+           <div className='flex-1 sm:px-10 px-5 pb-10 overflow-y-auto scrollbar-hide'>
+          <h1 className='text-3xl font-bold text-center font-tektur text-forest py-10'>Answer a Few Questions to Generate Your Video</h1>
+            
+            <Chat messages={messages} />
+          </div>
+          <div className='sm:px-10 py-4 '>
+            <ChatInput placeholder="Type here..." value={""} onChange={() => {}} onClick={() => {}} />
+          </div>
+        </div>
+        </>
+    )
+}
+
+export default Intake
