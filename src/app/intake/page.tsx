@@ -13,9 +13,9 @@ const Intake = () => {
     return (
         <>
        { isPopupOpen && <Popup handleClose={handleClosePopup} />}
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col"  style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
           <Header />
-           <div className='flex-1 sm:px-10 px-5 pb-10 overflow-y-auto scrollbar-hide'>
+           <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>
           <h1 className='text-3xl font-bold text-center font-tektur text-forest py-10'>Answer a Few Questions to Generate Your Video</h1>
             
             <Chat messages={messages} />

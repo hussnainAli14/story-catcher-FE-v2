@@ -17,7 +17,7 @@ import { useEffect } from 'react';
       return () => clearTimeout(timeout);
     }, []);
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-10">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-10"  style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
       <div className='flex flex-col items-center justify-center font-tektur'>
         <h1 className='text-3xl text-center font-tektur text-forest'>Story Catcher</h1>
         <h4 className='text-center font-normal text-slate'>Your life changing moment in video.</h4>

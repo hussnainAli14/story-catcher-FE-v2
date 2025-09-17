@@ -30,7 +30,7 @@ const Preview = () => {
     }, []);
 
     return (
-        <>
+        <div className='h-screen flex flex-col'  style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
         <Header />
         <h1 className='text-3xl font-bold text-center font-tektur text-forest py-10'>Your Story is Ready to Play</h1>
         <div className='flex justify-center items-center pt-6 sm:px-4 px-2'>
@@ -42,7 +42,7 @@ const Preview = () => {
             style={{ maxWidth: '100%'}}
         />
         </div>
-        </>
+        </div>
     )
 }
 
