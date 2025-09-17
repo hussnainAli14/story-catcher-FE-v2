@@ -5,12 +5,16 @@ import { messages } from '@/utils/dummyData'
 
 const Intake = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+    const handleClosePopup = () => {
+        setIsPopupOpen(false);
+    }
+
     return (
         <>
-       { isPopupOpen && <Popup />}
+       { isPopupOpen && <Popup handleClose={handleClosePopup} />}
         <div className="h-screen flex flex-col">
           <Header />
-          <button onClick={() => setIsPopupOpen(true)}>Open Popup</button>
            <div className='flex-1 sm:px-10 px-5 pb-10 overflow-y-auto scrollbar-hide'>
           <h1 className='text-3xl font-bold text-center font-tektur text-forest py-10'>Answer a Few Questions to Generate Your Video</h1>
             

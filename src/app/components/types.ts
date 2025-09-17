@@ -10,6 +10,7 @@ export type ButtonProps = {
     icon?: React.ReactNode;
     variant?: "icon" | "text";
     disabled?: boolean;
+    bgColor?: string;
 }
 
 export type ChatInputProps = InputProps & ButtonProps;
@@ -24,4 +25,8 @@ export type ChatBoxProps = AvatarProps & {
 
 export type ChatProps = {
     messages: ChatBoxProps[];
+}
+
+export type PopupProps = {
+    handleClose: () => void;
 }
