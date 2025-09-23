@@ -42,6 +42,17 @@ const Intake = () => {
         }
     }, [hasStarted, sessionId, messages.length, startSession]);
 
+    // Show popup 3 seconds after storyboard is generated
+    useEffect(() => {
+        if (isComplete && messages.some(msg => msg.message.includes('**Storyboard:'))) {
+            const timer = setTimeout(() => {
+                setIsPopupOpen(true);
+            }, 3000); // 3 seconds delay
+
+            return () => clearTimeout(timer);
+        }
+    }, [isComplete, messages]);
+
     const handleClosePopup = () => {
         setIsPopupOpen(false);
     };
