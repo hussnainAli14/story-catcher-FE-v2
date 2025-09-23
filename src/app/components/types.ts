@@ -2,6 +2,8 @@ export type InputProps = {
     placeholder?: string;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    disabled?: boolean;
 }
 
 export type ButtonProps = {
@@ -21,6 +23,8 @@ export type AvatarProps = {
 
 export type ChatBoxProps = AvatarProps & {
     message: string;
+    isLoading?: boolean;
+    isError?: boolean;
 }
 
 export type ChatProps = {

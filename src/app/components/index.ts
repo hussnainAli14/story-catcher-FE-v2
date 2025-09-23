@@ -7,3 +7,5 @@ export { default as ChatBox } from "./ChatBox";
 export { default as ChatItem } from "./ChatItem";
 export { default as Chat } from "./Chat";
 export { default as Popup } from "./Popup";
+export { default as ErrorBoundary } from "./ErrorBoundary";
+export { default as Storyboard } from "./Storyboard";
