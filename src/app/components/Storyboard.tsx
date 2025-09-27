@@ -125,7 +125,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
                   </div>
                   <p className="text-sm text-blue-600 mt-2">
                     Your video is currently being processed. This usually takes 2-5 minutes. 
-                    The video will appear here once it's ready.
+                    The video will appear here once it&apos;s ready.
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Video ID: {videoUrl.replace('videogen://', '')}
