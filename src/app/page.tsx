@@ -1,7 +1,7 @@
 "use client"
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { storyAPI } from '@/lib/api';
 
 export default function Home() {
@@ -10,7 +10,7 @@ export default function Home() {
     const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'unhealthy'>('checking');
     const [retryCount, setRetryCount] = useState(0);
 
-    const checkBackendHealth = async () => {
+    const checkBackendHealth = useCallback(async () => {
         try {
             setIsCheckingHealth(true);
             
@@ -35,7 +35,7 @@ export default function Home() {
             setHealthStatus('unhealthy');
             setIsCheckingHealth(false);
         }
-    };
+    }, [router]);
 
     const handleRetry = () => {
         setRetryCount(prev => prev + 1);

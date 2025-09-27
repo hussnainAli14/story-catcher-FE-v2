@@ -23,11 +23,18 @@ export interface ApiResponse {
   message?: string;
   error?: string;
   session_id?: string;
-  question?: any;
+  question?: {
+    id: number;
+    text: string;
+    category: string;
+    order: number;
+  };
   question_number?: number;
   total_questions?: number;
   session_complete?: boolean;
   storyboard?: string;
+  images?: string[];
+  video_url?: string;
 }
 
 class StoryCatcherAPI {
@@ -58,7 +65,7 @@ class StoryCatcherAPI {
     try {
       const response = await this.makeRequest('/health');
       return response.success || (response as { status?: string }).status === 'healthy';
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -132,7 +139,7 @@ class StoryCatcherAPI {
       throw new Error(response.message || 'Failed to get session status');
     }
 
-    return (response as { session_data: StorySession }).session_data;
+    return (response as unknown as { session_data: StorySession }).session_data;
   }
 }
 

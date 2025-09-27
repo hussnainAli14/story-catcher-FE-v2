@@ -23,7 +23,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
         {/* Simple Title */}
         <div className="mb-4">
           <h2 className="text-lg font-bold text-black">
-            🎬 <strong>Storyboard: "{title}" - {subtitle}</strong>
+            🎬 <strong>Storyboard: &ldquo;{title}&rdquo; - {subtitle}</strong>
           </h2>
         </div>
 
@@ -45,12 +45,13 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
             return (
               <div key={index} className="scene-container">
                 <h3 className="text-base font-bold text-black mb-2">
-                  <strong>Scene {sceneNumber}: "{sceneName}"</strong>
+                  <strong>Scene {sceneNumber}: &ldquo;{sceneName}&rdquo;</strong>
                 </h3>
                 
                 {/* Display image if available */}
                 {images[index] && (
                   <div className="mb-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={images[index]} 
                       alt={`Scene ${sceneNumber}: ${sceneName}`}
