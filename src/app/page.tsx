@@ -49,7 +49,7 @@ export default function Home() {
 
     useEffect(() => {
         checkBackendHealth();
-    }, []);
+    }, [checkBackendHealth]);
 
     const getStatusMessage = () => {
         switch (healthStatus) {
@@ -106,7 +106,7 @@ export default function Home() {
                     {healthStatus === 'unhealthy' && (
                         <div className="flex flex-col items-center gap-2">
                             <p className="text-xs text-gray-600 text-center max-w-xs">
-                                Please make sure the backend server is running on localhost:5000
+                                Please check the backend server status
                             </p>
                             <button 
                                 onClick={handleRetry}

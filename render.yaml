@@ -1,0 +1,11 @@
+# Render configuration for story-catcher frontend
+# This file tells Render how to build and deploy the Next.js app
+
+# Build command
+npm run build
+
+# Start command  
+npm start
+
+# Environment
+NODE_ENV=production

@@ -65,7 +65,7 @@ export const useStoryChat = () => {
   const checkBackendHealth = useCallback(async (): Promise<boolean> => {
     try {
       return await storyAPI.checkHealth();
-    } catch (error) {
+    } catch {
       return false;
     }
   }, []);
@@ -78,7 +78,7 @@ export const useStoryChat = () => {
       // Check if backend is available
       const isHealthy = await checkBackendHealth();
       if (!isHealthy) {
-        throw new Error('Backend server is not available. Please make sure the server is running on localhost:5000');
+        throw new Error('Backend server is not available. Please check the server status.');
       }
 
       const session: StorySession = await storyAPI.startSession(message);

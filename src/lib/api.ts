@@ -1,5 +1,5 @@
 // API service for communicating with Story Catcher Backend
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://story-catcher-backend.onrender.com/api';
 
 export interface StorySession {
   session_id: string;
@@ -31,7 +31,7 @@ export interface ApiResponse {
 }
 
 class StoryCatcherAPI {
-  private async makeRequest(endpoint: string, method: 'GET' | 'POST' = 'GET', body?: any): Promise<ApiResponse> {
+  private async makeRequest(endpoint: string, method: 'GET' | 'POST' = 'GET', body?: unknown): Promise<ApiResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method,
@@ -57,7 +57,7 @@ class StoryCatcherAPI {
   async checkHealth(): Promise<boolean> {
     try {
       const response = await this.makeRequest('/health');
-      return response.success || (response as any).status === 'healthy';
+      return response.success || (response as { status?: string }).status === 'healthy';
     } catch (error) {
       return false;
     }
@@ -125,14 +125,14 @@ class StoryCatcherAPI {
   }
 
   // Get session status
-  async getSessionStatus(sessionId: string): Promise<any> {
+  async getSessionStatus(sessionId: string): Promise<StorySession> {
     const response = await this.makeRequest(`/story/session/${sessionId}`);
     
     if (!response.success) {
       throw new Error(response.message || 'Failed to get session status');
     }
 
-    return (response as any).session_data;
+    return (response as { session_data: StorySession }).session_data;
   }
 }
 
