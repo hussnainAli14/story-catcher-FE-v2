@@ -35,4 +35,5 @@ export type ChatProps = {
 
 export type PopupProps = {
     handleClose: () => void;
+    videoUrl?: string;
 }

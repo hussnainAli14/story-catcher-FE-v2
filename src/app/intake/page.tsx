@@ -7,6 +7,7 @@ const Intake = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [userInput, setUserInput] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
+    const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
     
     const {
         messages,
@@ -45,6 +46,12 @@ const Intake = () => {
     // Show popup 3 seconds after storyboard is generated
     useEffect(() => {
         if (isComplete && messages.some(msg => msg.message.includes('**Storyboard:'))) {
+            // Find the message with video URL
+            const storyboardMessage = messages.find(msg => msg.message.includes('**Storyboard:'));
+            if (storyboardMessage && storyboardMessage.videoUrl) {
+                setVideoUrl(storyboardMessage.videoUrl);
+            }
+            
             const timer = setTimeout(() => {
                 setIsPopupOpen(true);
             }, 3000); // 3 seconds delay
@@ -94,7 +101,7 @@ const Intake = () => {
 
     return (
         <ErrorBoundary>
-            {isPopupOpen && <Popup handleClose={handleClosePopup} />}
+            {isPopupOpen && <Popup handleClose={handleClosePopup} videoUrl={videoUrl} />}
             <div className="h-screen flex flex-col" style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
                 <Header />
                 <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>
