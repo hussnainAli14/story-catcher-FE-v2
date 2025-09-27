@@ -117,18 +117,36 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
               🎬 Your Generated Video
             </h3>
             <div className="space-y-3">
-              <video 
-                controls 
-                className="w-full max-w-2xl rounded-lg shadow-sm"
-                poster={images[0]} // Use first image as poster
-              >
-                <source src={videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              <div className="text-sm text-gray-600">
-                <p><strong>Video URL:</strong> <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{videoUrl}</a></p>
-                <p><strong>Generated from:</strong> {images.length} DALL-E 3 images</p>
-              </div>
+              {videoUrl.startsWith('videogen://') ? (
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span className="text-blue-800 font-medium">Video is being generated...</span>
+                  </div>
+                  <p className="text-sm text-blue-600 mt-2">
+                    Your video is currently being processed. This usually takes 2-5 minutes. 
+                    The video will appear here once it's ready.
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Video ID: {videoUrl.replace('videogen://', '')}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <video 
+                    controls 
+                    className="w-full max-w-2xl rounded-lg shadow-sm"
+                    poster={images[0]} // Use first image as poster
+                  >
+                    <source src={videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                  <div className="text-sm text-gray-600">
+                    <p><strong>Video URL:</strong> <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{videoUrl}</a></p>
+                    <p><strong>Generated from:</strong> {images.length} DALL-E 3 images</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
