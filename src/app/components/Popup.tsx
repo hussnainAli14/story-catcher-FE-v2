@@ -57,7 +57,7 @@ const Popup = ({handleClose, videoUrl}: PopupProps) => {
     if (isSuccess) {
         return (
             <div className='fixed inset-0 backdrop-blur-sm flex items-center justify-center'>
-                <div className='bg-white sm:px-6 px-2 py-10 rounded-lg shadow-lg max-w-lg w-full mx-4 rounded-xl flex flex-col gap-4 relative'>
+                <div className='bg-white sm:px-6 px-2 py-10 shadow-lg max-w-lg w-full mx-4 rounded-xl flex flex-col gap-4 relative'>
                     <div className='pb-6 text-center'>
                         <div className="text-green-600 text-6xl mb-4">✓</div>
                         <h1 className='text-2xl font-mono-space font-bold text-forest pb-[1px]'>Thank You!</h1>
@@ -70,7 +70,7 @@ const Popup = ({handleClose, videoUrl}: PopupProps) => {
 
     return (
         <div className='fixed inset-0 backdrop-blur-sm flex items-center justify-center'>
-            <div className='bg-white sm:px-6 px-2 py-10 rounded-lg shadow-lg max-w-lg w-full mx-4 rounded-xl flex flex-col gap-4 relative'>
+            <div className='bg-white sm:px-6 px-2 py-10 shadow-lg max-w-lg w-full mx-4 rounded-xl flex flex-col gap-4 relative'>
             <button className='absolute top-2 right-4 text-gray-500 hover:text-gray-700 text-4xl cursor-pointer' onClick={handleClose}>×</button>
                 
                 <div className='pb-6'>
