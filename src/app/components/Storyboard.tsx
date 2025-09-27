@@ -2,9 +2,11 @@ import React from 'react';
 
 interface StoryboardProps {
   content: string;
+  images?: string[];
+  videoUrl?: string;
 }
 
-const Storyboard: React.FC<StoryboardProps> = ({ content }) => {
+const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl }) => {
   // Parse the storyboard content and format it simply
   const formatStoryboard = (text: string) => {
     // Split by scenes
@@ -45,6 +47,17 @@ const Storyboard: React.FC<StoryboardProps> = ({ content }) => {
                 <h3 className="text-base font-bold text-black mb-2">
                   <strong>Scene {sceneNumber}: "{sceneName}"</strong>
                 </h3>
+                
+                {/* Display image if available */}
+                {images[index] && (
+                  <div className="mb-3">
+                    <img 
+                      src={images[index]} 
+                      alt={`Scene ${sceneNumber}: ${sceneName}`}
+                      className="w-full max-w-md rounded-lg shadow-sm border"
+                    />
+                  </div>
+                )}
                 
                 <div className="space-y-1 ml-4">
                   {visualMatch && (
@@ -95,6 +108,29 @@ const Storyboard: React.FC<StoryboardProps> = ({ content }) => {
             );
           })}
         </div>
+
+        {/* Video Section */}
+        {videoUrl && (
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-bold text-black mb-3">
+              🎬 Your Generated Video
+            </h3>
+            <div className="space-y-3">
+              <video 
+                controls 
+                className="w-full max-w-2xl rounded-lg shadow-sm"
+                poster={images[0]} // Use first image as poster
+              >
+                <source src={videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div className="text-sm text-gray-600">
+                <p><strong>Video URL:</strong> <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{videoUrl}</a></p>
+                <p><strong>Generated from:</strong> {images.length} DALL-E 3 images</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

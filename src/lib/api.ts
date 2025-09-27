@@ -14,6 +14,8 @@ export interface StorySession {
   total_questions?: number;
   session_complete?: boolean;
   storyboard?: string;
+  images?: string[];
+  video_url?: string;
 }
 
 export interface ApiResponse {
@@ -99,6 +101,8 @@ class StoryCatcherAPI {
       total_questions: response.total_questions,
       session_complete: response.session_complete || false,
       storyboard: response.storyboard,
+      images: response.images,
+      video_url: response.video_url,
     };
   }
 

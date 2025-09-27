@@ -2,7 +2,7 @@ import React from 'react'
 import { ChatBoxProps } from './types'
 import Storyboard from './Storyboard'
 
-const ChatBox = ({ message, type="assistant", isLoading, isError }: ChatBoxProps) => {
+const ChatBox = ({ message, type="assistant", isLoading, isError, images, videoUrl }: ChatBoxProps) => {
     const getBoxStyles = () => {
         if (isError) {
             return "bg-red-100 border border-red-300 text-red-700";
@@ -27,7 +27,7 @@ const ChatBox = ({ message, type="assistant", isLoading, isError }: ChatBoxProps
                 </div>
             ) : isStoryboard ? (
                 <div className="w-full">
-                    <Storyboard content={message} />
+                    <Storyboard content={message} images={images} videoUrl={videoUrl} />
                 </div>
             ) : (
                 message

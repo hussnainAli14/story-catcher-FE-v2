@@ -25,6 +25,8 @@ export type ChatBoxProps = AvatarProps & {
     message: string;
     isLoading?: boolean;
     isError?: boolean;
+    images?: string[];
+    videoUrl?: string;
 }
 
 export type ChatProps = {

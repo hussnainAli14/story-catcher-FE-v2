@@ -6,6 +6,8 @@ export interface ChatMessage {
   message: string;
   isLoading?: boolean;
   isError?: boolean;
+  images?: string[];
+  videoUrl?: string;
 }
 
 export interface ChatState {
@@ -143,7 +145,9 @@ export const useStoryChat = () => {
       if (session.session_complete && session.storyboard) {
         newMessages.push({ 
           type: 'assistant', 
-          message: session.storyboard 
+          message: session.storyboard,
+          images: session.images,
+          videoUrl: session.video_url
         });
       } else if (session.question) {
         // Add the next question
