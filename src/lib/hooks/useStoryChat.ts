@@ -143,6 +143,52 @@ export const useStoryChat = () => {
     }
   }, [state.sessionId]);
 
+  // Poll video status until completion
+  const pollVideoStatus = useCallback(async (videoUrl: string) => {
+    if (!videoUrl.startsWith('videogen://')) return;
+    
+    const apiFileId = videoUrl.replace('videogen://', '');
+    
+    const checkStatus = async () => {
+      try {
+        const result = await storyAPI.checkVideoStatus(apiFileId);
+        
+        if (result.success && result.result) {
+          const loadingState = result.result.loadingState;
+          
+          if (loadingState === 'FULFILLED') {
+            const finalVideoUrl = result.result.apiFileSignedUrl;
+            if (finalVideoUrl) {
+              // Update the message with the final video URL
+              setState(prev => ({
+                ...prev,
+                messages: prev.messages.map(msg => 
+                  msg.videoUrl === videoUrl 
+                    ? { ...msg, message: 'Your video is ready!', videoUrl: finalVideoUrl, isLoading: false }
+                    : msg
+                )
+              }));
+              return;
+            }
+          }
+          
+          // Still processing, check again in 10 seconds
+          setTimeout(checkStatus, 10000);
+        } else {
+          // Error or still processing, check again in 15 seconds
+          setTimeout(checkStatus, 15000);
+        }
+      } catch (error) {
+        console.error('Error checking video status:', error);
+        // Check again in 20 seconds on error
+        setTimeout(checkStatus, 20000);
+      }
+    };
+    
+    // Start checking after 5 seconds
+    setTimeout(checkStatus, 5000);
+  }, []);
+
   // Submit an answer
   const submitAnswer = useCallback(async (answer: string) => {
     if (!state.sessionId || state.isComplete) return;
@@ -185,11 +231,11 @@ export const useStoryChat = () => {
             isLoading: true
           });
         } else if (session.storyboard) {
-          newMessages.push({ 
-            type: 'assistant', 
-            message: session.storyboard,
+        newMessages.push({ 
+          type: 'assistant', 
+          message: session.storyboard,
             isEditable: true
-          });
+        });
         }
       } else if (session.question) {
         // Add the next question
@@ -242,7 +288,7 @@ export const useStoryChat = () => {
         };
       });
     }
-  }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus]);
+  }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus, pollVideoStatus]);
 
   // Generate video from completed session
   const generateVideo = useCallback(async (email?: string) => {
@@ -268,20 +314,41 @@ export const useStoryChat = () => {
       const result = await storyAPI.generateVideoFromSession(state.sessionId, email);
       
       if (result.success && result.video_url) {
-        setState(prev => {
-          const messagesToKeep = prev.messages.length - 1; // Remove loading message
-          return {
+        // Check if it's a videogen:// URL that needs polling
+        if (result.video_url.startsWith('videogen://')) {
+          // Keep the loading message and start polling for video completion
+          setState(prev => ({
             ...prev,
             messages: [
-              ...prev.messages.slice(0, messagesToKeep),
+              ...prev.messages.slice(0, -1), // Remove loading message
               {
                 type: 'assistant',
-                message: 'Your video is ready!',
+                message: 'Your video is generating...',
+                isLoading: true,
                 videoUrl: result.video_url
               }
             ]
-          };
-        });
+          }));
+          
+          // Start polling for video completion
+          pollVideoStatus(result.video_url);
+        } else {
+          // Direct video URL, show immediately
+          setState(prev => {
+            const messagesToKeep = prev.messages.length - 1; // Remove loading message
+            return {
+              ...prev,
+              messages: [
+                ...prev.messages.slice(0, messagesToKeep),
+                {
+                  type: 'assistant',
+                  message: 'Your video is ready!',
+                  videoUrl: result.video_url
+                }
+              ]
+            };
+          });
+        }
       } else {
         throw new Error(result.error || 'Video generation failed');
       }

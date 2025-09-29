@@ -16,6 +16,13 @@ const ChatBox = ({
     onCancelEdit
 }: ChatBoxProps) => {
     const [editText, setEditText] = useState(message);
+    
+    // Update editText when message changes or when editing starts
+    React.useEffect(() => {
+        if (isEditing) {
+            setEditText(message);
+        }
+    }, [isEditing, message]);
 
     const getBoxStyles = () => {
         if (isError) {
