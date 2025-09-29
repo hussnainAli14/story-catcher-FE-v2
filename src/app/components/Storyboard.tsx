@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { storyAPI } from '@/lib/api';
 
 interface StoryboardProps {
   content: string;
@@ -7,6 +8,49 @@ interface StoryboardProps {
 }
 
 const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl }) => {
+  const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
+
+  // Check video status if it's a processing video
+  useEffect(() => {
+    if (videoUrl && videoUrl.startsWith('videogen://')) {
+      const apiFileId = videoUrl.replace('videogen://', '');
+      checkVideoStatus(apiFileId);
+    }
+  }, [videoUrl]);
+
+  const checkVideoStatus = async (apiFileId: string) => {
+    
+    const checkStatus = async () => {
+      try {
+        const result = await storyAPI.checkVideoStatus(apiFileId);
+        
+        if (result.success && result.result) {
+          const loadingState = result.result.loadingState;
+          
+          if (loadingState === 'FULFILLED') {
+            const videoUrl = result.result.apiFileSignedUrl;
+            if (videoUrl) {
+              setCurrentVideoUrl(videoUrl);
+              return;
+            }
+          }
+          
+          // Still processing, check again in 10 seconds
+          setTimeout(checkStatus, 10000);
+        } else {
+          // Error or still processing, check again in 15 seconds
+          setTimeout(checkStatus, 15000);
+        }
+      } catch (error) {
+        console.error('Error checking video status:', error);
+        // Check again in 20 seconds on error
+        setTimeout(checkStatus, 20000);
+      }
+    };
+    
+    // Start checking after 5 seconds
+    setTimeout(checkStatus, 5000);
+  };
   // Parse the storyboard content and format it simply
   const formatStoryboard = (text: string) => {
     // Split by scenes
@@ -111,13 +155,13 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
         </div>
 
         {/* Video Section */}
-        {videoUrl && (
+        {currentVideoUrl && (
           <div className="mt-8 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-lg font-bold text-black mb-3">
               🎬 Your Generated Video
             </h3>
             <div className="space-y-3">
-              {videoUrl.startsWith('videogen://') ? (
+              {currentVideoUrl.startsWith('videogen://') ? (
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -128,23 +172,19 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
                     The video will appear here once it&apos;s ready.
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Video ID: {videoUrl.replace('videogen://', '')}
+                    Video ID: {currentVideoUrl.replace('videogen://', '')}
                   </p>
                 </div>
               ) : (
                 <>
                   <video 
                     controls 
-                    className="w-full max-w-2xl rounded-lg shadow-sm"
+                    className="w-full max-w-md mx-auto rounded-lg shadow-sm"
                     poster={images[0]} // Use first image as poster
                   >
-                    <source src={videoUrl} type="video/mp4" />
+                    <source src={currentVideoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
-                  <div className="text-sm text-gray-600">
-                    <p><strong>Video URL:</strong> <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{videoUrl}</a></p>
-                    <p><strong>Generated from:</strong> {images.length} DALL-E 3 images</p>
-                  </div>
                 </>
               )}
             </div>

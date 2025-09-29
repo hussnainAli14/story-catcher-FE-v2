@@ -1,5 +1,24 @@
 // API service for communicating with Story Catcher Backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://story-catcher-backend.onrender.com/api';
+// Environment-based API URL configuration
+const getApiBaseUrl = (): string => {
+  // Check if we're in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  // If NEXT_PUBLIC_API_URL is explicitly set, use it
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // Auto-detect based on environment
+  if (isDevelopment) {
+    return 'http://localhost:5000/api';
+  }
+  
+  // Production fallback
+  return 'https://story-catcher-backend.onrender.com/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface StorySession {
   session_id: string;
@@ -140,6 +159,18 @@ class StoryCatcherAPI {
     }
 
     return (response as unknown as { session_data: StorySession }).session_data;
+  }
+
+  // Check video status
+  async checkVideoStatus(apiFileId: string): Promise<{ success: boolean; result?: { loadingState: string; apiFileSignedUrl?: string }; error?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL.replace('/api', '')}/api/video/status/${apiFileId}`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Video status check failed:', error);
+      return { success: false, error: 'Failed to check video status' };
+    }
   }
 }
 
