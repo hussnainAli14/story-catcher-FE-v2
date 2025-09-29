@@ -1,8 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ChatBoxProps } from './types'
 import Storyboard from './Storyboard'
 
-const ChatBox = ({ message, type="assistant", isLoading, isError, images, videoUrl }: ChatBoxProps) => {
+const ChatBox = ({ 
+    message, 
+    type="assistant", 
+    isLoading, 
+    isError, 
+    images, 
+    videoUrl, 
+    isEditable = false,
+    isEditing = false,
+    onEdit,
+    onStartEdit,
+    onCancelEdit
+}: ChatBoxProps) => {
+    const [editText, setEditText] = useState(message);
+
     const getBoxStyles = () => {
         if (isError) {
             return "bg-red-100 border border-red-300 text-red-700";
@@ -18,19 +32,96 @@ const ChatBox = ({ message, type="assistant", isLoading, isError, images, videoU
     // Check if the message contains a storyboard
     const isStoryboard = message.includes('**Storyboard:') && message.includes('**Scene');
 
+    const handleSave = () => {
+        if (onEdit) {
+            onEdit(editText);
+        }
+    };
+
+    const handleCancel = () => {
+        setEditText(message);
+        if (onCancelEdit) {
+            onCancelEdit();
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            handleSave();
+        } else if (e.key === 'Escape') {
+            handleCancel();
+        }
+    };
+
     return (
-        <div className={`flex max-w-full md:max-w-1/2 px-4 py-2 ${getBoxStyles()} font-space-mono text-forest`}>
+        <div className={`flex max-w-full md:max-w-1/2 px-4 py-2 ${getBoxStyles()} font-space-mono text-forest ${isEditable && !isEditing ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+             onClick={isEditable && !isEditing ? onStartEdit : undefined}>
             {isLoading ? (
                 <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                     <span>Generating your story...</span>
                 </div>
+            ) : isEditing ? (
+                <div className="w-full space-y-3">
+                    <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 font-space-mono text-sm leading-relaxed resize-none focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest focus:ring-opacity-20"
+                        rows={Math.max(3, editText.split('\n').length)}
+                        autoFocus
+                    />
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            onClick={handleCancel}
+                            className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            className="px-3 py-1 text-sm bg-forest text-white rounded hover:bg-green-700 transition-colors"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </div>
             ) : isStoryboard ? (
-                <div className="w-full">
+                <div className="w-full relative">
                     <Storyboard content={message} images={images} videoUrl={videoUrl} />
+                    {isEditable && (
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onStartEdit?.();
+                                }}
+                                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                title="Edit storyboard"
+                            >
+                                ✏️
+                            </button>
+                        </div>
+                    )}
                 </div>
             ) : (
-                message
+                <div className="relative">
+                    {message}
+                    {isEditable && (
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onStartEdit?.();
+                                }}
+                                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                title="Edit storyboard"
+                            >
+                                ✏️
+                            </button>
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     )

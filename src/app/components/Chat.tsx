@@ -2,7 +2,12 @@ import React, { useEffect, useRef } from 'react'
 import ChatItem from './ChatItem'
 import { ChatProps } from './types'
 
-const Chat = ({messages}: ChatProps) => {
+const Chat = ({
+    messages, 
+    onEditMessage, 
+    onStartEditing, 
+    onCancelEditing 
+}: ChatProps) => {
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to bottom when messages change
@@ -23,6 +28,11 @@ const Chat = ({messages}: ChatProps) => {
                     isError={message.isError}
                     images={message.images}
                     videoUrl={message.videoUrl}
+                    isEditable={message.isEditable}
+                    isEditing={message.isEditing}
+                    onEdit={(newMessage) => onEditMessage?.(index, newMessage)}
+                    onStartEdit={() => onStartEditing?.(index)}
+                    onCancelEdit={() => onCancelEditing?.(index)}
                 />
             ))}
             {/* Invisible element to scroll to */}

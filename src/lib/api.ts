@@ -172,6 +172,20 @@ class StoryCatcherAPI {
       return { success: false, error: 'Failed to check video status' };
     }
   }
+
+  // Generate video from completed session
+  async generateVideoFromSession(sessionId: string, email?: string): Promise<{ success: boolean; video_url?: string; message?: string; error?: string }> {
+    try {
+      const response = await this.makeRequest('/video/generate-from-session', 'POST', {
+        session_id: sessionId,
+        email: email || ''
+      });
+      return response;
+    } catch (error) {
+      console.error('Video generation failed:', error);
+      return { success: false, error: 'Failed to generate video' };
+    }
+  }
 }
 
 export const storyAPI = new StoryCatcherAPI();

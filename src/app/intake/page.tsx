@@ -17,8 +17,14 @@ const Intake = () => {
         isComplete,
         isLoading,
         error,
+        showGenerateButton,
         startSession,
         submitAnswer,
+        generateVideo,
+        editMessage,
+        startEditing,
+        cancelEditing,
+        showGenerateButton: showGenerateBtn,
         resetSession,
         clearError,
         checkBackendHealth
@@ -46,12 +52,6 @@ const Intake = () => {
     // Show popup 3 seconds after storyboard is generated
     useEffect(() => {
         if (isComplete && messages.some(msg => msg.message.includes('**Storyboard:'))) {
-            // Find the message with video URL
-            const storyboardMessage = messages.find(msg => msg.message.includes('**Storyboard:'));
-            if (storyboardMessage && storyboardMessage.videoUrl) {
-                setVideoUrl(storyboardMessage.videoUrl);
-            }
-            
             const timer = setTimeout(() => {
                 setIsPopupOpen(true);
             }, 3000); // 3 seconds delay
@@ -62,6 +62,7 @@ const Intake = () => {
 
     const handleClosePopup = () => {
         setIsPopupOpen(false);
+        showGenerateBtn(); // Show generate button after popup closes
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,7 +102,7 @@ const Intake = () => {
 
     return (
         <ErrorBoundary>
-            {isPopupOpen && <Popup handleClose={handleClosePopup} videoUrl={videoUrl} />}
+            {isPopupOpen && <Popup handleClose={handleClosePopup} onGenerateVideo={generateVideo} />}
             <div className="h-screen flex flex-col" style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
                 <Header />
                 <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>
@@ -129,13 +130,26 @@ const Intake = () => {
                         )}
                     </div>
                     
-                    <Chat messages={messages} />
+                    <Chat 
+                        messages={messages} 
+                        onEditMessage={editMessage}
+                        onStartEditing={startEditing}
+                        onCancelEditing={cancelEditing}
+                    />
                     
                     {isComplete && (
-                        <div className="mt-6 text-center">
+                        <div className="mt-6 text-center space-y-4">
+                            {showGenerateButton && (
+                                <button
+                                    onClick={() => generateVideo()}
+                                    className="px-6 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono"
+                                >
+                                    Generate Video
+                                </button>
+                            )}
                             <button
                                 onClick={handleReset}
-                                className="px-6 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono"
+                                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-space-mono"
                             >
                                 Start New Story
                             </button>

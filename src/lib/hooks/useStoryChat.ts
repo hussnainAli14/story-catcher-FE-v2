@@ -8,6 +8,8 @@ export interface ChatMessage {
   isError?: boolean;
   images?: string[];
   videoUrl?: string;
+  isEditable?: boolean;
+  isEditing?: boolean;
 }
 
 export interface ChatState {
@@ -18,6 +20,7 @@ export interface ChatState {
   isComplete: boolean;
   isLoading: boolean;
   error: string | null;
+  showGenerateButton: boolean;
 }
 
 const SESSION_STORAGE_KEY = 'story-catcher-session';
@@ -31,6 +34,7 @@ export const useStoryChat = () => {
     isComplete: false,
     isLoading: false,
     error: null,
+    showGenerateButton: false,
   });
 
   // Load session from localStorage on mount
@@ -141,13 +145,12 @@ export const useStoryChat = () => {
         { type: 'assistant', message: session.message }
       ];
 
-      // If session is complete, add the storyboard
+      // If session is complete, add the storyboard (no video yet)
       if (session.session_complete && session.storyboard) {
         newMessages.push({ 
           type: 'assistant', 
           message: session.storyboard,
-          images: session.images,
-          videoUrl: session.video_url
+          isEditable: true
         });
       } else if (session.question) {
         // Add the next question
@@ -156,7 +159,6 @@ export const useStoryChat = () => {
           message: session.question.text 
         });
       }
-
 
       setState(prev => {
         // Calculate how many messages to keep (remove loading message if it exists)
@@ -196,6 +198,108 @@ export const useStoryChat = () => {
     }
   }, [state.sessionId, state.currentQuestion, state.isComplete]);
 
+  // Generate video from completed session
+  const generateVideo = useCallback(async (email?: string) => {
+    if (!state.sessionId) return;
+
+    // Hide the generate button
+    setState(prev => ({ ...prev, showGenerateButton: false }));
+
+    // Add video generation message
+    setState(prev => ({
+      ...prev,
+      messages: [
+        ...prev.messages,
+        {
+          type: 'assistant',
+          message: 'Your video is generating...',
+          isLoading: true
+        }
+      ]
+    }));
+
+    try {
+      const result = await storyAPI.generateVideoFromSession(state.sessionId, email);
+      
+      if (result.success && result.video_url) {
+        setState(prev => {
+          const messagesToKeep = prev.messages.length - 1; // Remove loading message
+          return {
+            ...prev,
+            messages: [
+              ...prev.messages.slice(0, messagesToKeep),
+              {
+                type: 'assistant',
+                message: 'Your video is ready!',
+                videoUrl: result.video_url
+              }
+            ]
+          };
+        });
+      } else {
+        throw new Error(result.error || 'Video generation failed');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate video';
+      setState(prev => {
+        const messagesToKeep = prev.messages.length - 1; // Remove loading message
+        return {
+          ...prev,
+          showGenerateButton: true, // Show button again on error
+          messages: [
+            ...prev.messages.slice(0, messagesToKeep),
+            {
+              type: 'assistant',
+              message: 'Sorry, video generation failed. Please try again.',
+              isError: true
+            }
+          ]
+        };
+      });
+    }
+  }, [state.sessionId]);
+
+  // Edit a message
+  const editMessage = useCallback((messageIndex: number, newMessage: string) => {
+    setState(prev => ({
+      ...prev,
+      messages: prev.messages.map((msg, index) => 
+        index === messageIndex 
+          ? { ...msg, message: newMessage, isEditing: false }
+          : msg
+      )
+    }));
+  }, []);
+
+  // Start editing a message
+  const startEditing = useCallback((messageIndex: number) => {
+    setState(prev => ({
+      ...prev,
+      messages: prev.messages.map((msg, index) => 
+        index === messageIndex 
+          ? { ...msg, isEditing: true }
+          : { ...msg, isEditing: false }
+      )
+    }));
+  }, []);
+
+  // Cancel editing
+  const cancelEditing = useCallback((messageIndex: number) => {
+    setState(prev => ({
+      ...prev,
+      messages: prev.messages.map((msg, index) => 
+        index === messageIndex 
+          ? { ...msg, isEditing: false }
+          : msg
+      )
+    }));
+  }, []);
+
+  // Show generate button
+  const showGenerateButton = useCallback(() => {
+    setState(prev => ({ ...prev, showGenerateButton: true }));
+  }, []);
+
   // Reset the session
   const resetSession = useCallback(() => {
     localStorage.removeItem(SESSION_STORAGE_KEY);
@@ -219,6 +323,11 @@ export const useStoryChat = () => {
     ...state,
     startSession,
     submitAnswer,
+    generateVideo,
+    editMessage,
+    startEditing,
+    cancelEditing,
+    showGenerateButton,
     resetSession,
     clearError,
     checkBackendHealth,

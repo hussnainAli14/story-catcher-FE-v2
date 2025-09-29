@@ -27,13 +27,21 @@ export type ChatBoxProps = AvatarProps & {
     isError?: boolean;
     images?: string[];
     videoUrl?: string;
+    isEditable?: boolean;
+    isEditing?: boolean;
+    onEdit?: (newMessage: string) => void;
+    onStartEdit?: () => void;
+    onCancelEdit?: () => void;
 }
 
 export type ChatProps = {
     messages: ChatBoxProps[];
+    onEditMessage?: (index: number, newMessage: string) => void;
+    onStartEditing?: (index: number) => void;
+    onCancelEditing?: (index: number) => void;
 }
 
 export type PopupProps = {
     handleClose: () => void;
-    videoUrl?: string;
+    onGenerateVideo: (email?: string) => void;
 }
