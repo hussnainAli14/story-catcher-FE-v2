@@ -7,7 +7,6 @@ const Intake = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [userInput, setUserInput] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
-    const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
     
     const {
         messages,
@@ -24,7 +23,7 @@ const Intake = () => {
         editMessage,
         startEditing,
         cancelEditing,
-        showGenerateButton: showGenerateBtn,
+        setShowGenerateButton,
         resetSession,
         clearError,
         checkBackendHealth
@@ -62,7 +61,7 @@ const Intake = () => {
 
     const handleClosePopup = () => {
         setIsPopupOpen(false);
-        showGenerateBtn(); // Show generate button after popup closes
+        setShowGenerateButton(); // Show generate button after popup closes
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

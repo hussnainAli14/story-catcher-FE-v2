@@ -239,8 +239,7 @@ export const useStoryChat = () => {
       } else {
         throw new Error(result.error || 'Video generation failed');
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate video';
+    } catch {
       setState(prev => {
         const messagesToKeep = prev.messages.length - 1; // Remove loading message
         return {
@@ -296,7 +295,7 @@ export const useStoryChat = () => {
   }, []);
 
   // Show generate button
-  const showGenerateButton = useCallback(() => {
+  const setShowGenerateButton = useCallback(() => {
     setState(prev => ({ ...prev, showGenerateButton: true }));
   }, []);
 
@@ -311,6 +310,7 @@ export const useStoryChat = () => {
       isComplete: false,
       isLoading: false,
       error: null,
+      showGenerateButton: false,
     });
   }, []);
 
@@ -327,7 +327,7 @@ export const useStoryChat = () => {
     editMessage,
     startEditing,
     cancelEditing,
-    showGenerateButton,
+    setShowGenerateButton,
     resetSession,
     clearError,
     checkBackendHealth,
