@@ -212,7 +212,7 @@ export const useStoryChat = () => {
         };
       });
     }
-  }, [state.sessionId, state.currentQuestion, state.isComplete]);
+  }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus]);
 
   // Generate video from completed session
   const generateVideo = useCallback(async (email?: string) => {

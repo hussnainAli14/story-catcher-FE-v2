@@ -33,6 +33,7 @@ export interface StorySession {
   total_questions?: number;
   session_complete?: boolean;
   storyboard?: string;
+  storyboard_generating?: boolean;
   images?: string[];
   video_url?: string;
 }
