@@ -113,6 +113,36 @@ export const useStoryChat = () => {
     }
   }, [checkBackendHealth]);
 
+  // Poll for storyboard completion
+  const pollStoryboardStatus = useCallback(async () => {
+    if (!state.sessionId) return;
+
+    try {
+      const result = await storyAPI.checkStoryboardStatus(state.sessionId);
+      
+      if (result.success && result.status === 'completed' && result.storyboard) {
+        // Replace the loading message with the completed storyboard
+        setState(prev => ({
+          ...prev,
+          messages: prev.messages.map((msg, index) => 
+            index === prev.messages.length - 1 && msg.isLoading
+              ? { 
+                  type: 'assistant', 
+                  message: result.storyboard!,
+                  isEditable: true
+                }
+              : msg
+          )
+        }));
+      } else if (result.success && result.status === 'generating') {
+        // Continue polling
+        setTimeout(() => pollStoryboardStatus(), 2000);
+      }
+    } catch (error) {
+      console.error('Error polling storyboard status:', error);
+    }
+  }, [state.sessionId]);
+
   // Submit an answer
   const submitAnswer = useCallback(async (answer: string) => {
     if (!state.sessionId || state.isComplete) return;
@@ -314,36 +344,6 @@ export const useStoryChat = () => {
   const setShowGenerateButton = useCallback(() => {
     setState(prev => ({ ...prev, showGenerateButton: true }));
   }, []);
-
-  // Poll for storyboard completion
-  const pollStoryboardStatus = useCallback(async () => {
-    if (!state.sessionId) return;
-
-    try {
-      const result = await storyAPI.checkStoryboardStatus(state.sessionId);
-      
-      if (result.success && result.status === 'completed' && result.storyboard) {
-        // Replace the loading message with the completed storyboard
-        setState(prev => ({
-          ...prev,
-          messages: prev.messages.map((msg, index) => 
-            index === prev.messages.length - 1 && msg.isLoading
-              ? { 
-                  type: 'assistant', 
-                  message: result.storyboard!,
-                  isEditable: true
-                }
-              : msg
-          )
-        }));
-      } else if (result.success && result.status === 'generating') {
-        // Continue polling
-        setTimeout(() => pollStoryboardStatus(), 2000);
-      }
-    } catch (error) {
-      console.error('Error polling storyboard status:', error);
-    }
-  }, [state.sessionId]);
 
   // Reset the session
   const resetSession = useCallback(() => {
