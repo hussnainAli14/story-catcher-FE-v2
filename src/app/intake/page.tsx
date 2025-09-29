@@ -5,6 +5,7 @@ import { useStoryChat } from '@/lib/hooks/useStoryChat'
 
 const Intake = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [popupShown, setPopupShown] = useState(false);
     const [userInput, setUserInput] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
     
@@ -48,16 +49,17 @@ const Intake = () => {
         }
     }, [hasStarted, sessionId, messages.length, startSession]);
 
-    // Show popup 3 seconds after storyboard is generated
+    // Show popup 3 seconds after storyboard is generated (only once)
     useEffect(() => {
-        if (isComplete && messages.some(msg => msg.message.includes('**Storyboard:'))) {
+        if (isComplete && messages.some(msg => msg.message.includes('**Storyboard:')) && !popupShown) {
             const timer = setTimeout(() => {
                 setIsPopupOpen(true);
+                setPopupShown(true);
             }, 3000); // 3 seconds delay
 
             return () => clearTimeout(timer);
         }
-    }, [isComplete, messages]);
+    }, [isComplete, messages, popupShown]);
 
     const handleClosePopup = () => {
         setIsPopupOpen(false);
@@ -85,6 +87,8 @@ const Intake = () => {
         resetSession();
         setHasStarted(false);
         setUserInput('');
+        setPopupShown(false);
+        setIsPopupOpen(false);
     };
 
     const getProgressText = () => {
