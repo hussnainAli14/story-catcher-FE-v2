@@ -146,12 +146,21 @@ export const useStoryChat = () => {
       ];
 
       // If session is complete, add the storyboard (no video yet)
-      if (session.session_complete && session.storyboard) {
-        newMessages.push({ 
-          type: 'assistant', 
-          message: session.storyboard,
-          isEditable: true
-        });
+      if (session.session_complete) {
+        if (session.storyboard_generating) {
+          // Storyboard is still generating, add polling message
+          newMessages.push({ 
+            type: 'assistant', 
+            message: 'Generating your storyboard...',
+            isLoading: true
+          });
+        } else if (session.storyboard) {
+          newMessages.push({ 
+            type: 'assistant', 
+            message: session.storyboard,
+            isEditable: true
+          });
+        }
       } else if (session.question) {
         // Add the next question
         newMessages.push({ 
@@ -164,7 +173,7 @@ export const useStoryChat = () => {
         // Calculate how many messages to keep (remove loading message if it exists)
         const messagesToKeep = state.currentQuestion === 4 ? prev.messages.length - 1 : prev.messages.length;
         
-        return {
+        const newState = {
           ...prev,
           currentQuestion: session.question_number || prev.currentQuestion + 1,
           totalQuestions: session.total_questions || prev.totalQuestions,
@@ -177,6 +186,13 @@ export const useStoryChat = () => {
           isLoading: false,
           error: null,
         };
+
+        // Start polling if storyboard is generating
+        if (session.storyboard_generating) {
+          setTimeout(() => pollStoryboardStatus(), 1000);
+        }
+
+        return newState;
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit answer';
@@ -299,6 +315,36 @@ export const useStoryChat = () => {
     setState(prev => ({ ...prev, showGenerateButton: true }));
   }, []);
 
+  // Poll for storyboard completion
+  const pollStoryboardStatus = useCallback(async () => {
+    if (!state.sessionId) return;
+
+    try {
+      const result = await storyAPI.checkStoryboardStatus(state.sessionId);
+      
+      if (result.success && result.status === 'completed' && result.storyboard) {
+        // Replace the loading message with the completed storyboard
+        setState(prev => ({
+          ...prev,
+          messages: prev.messages.map((msg, index) => 
+            index === prev.messages.length - 1 && msg.isLoading
+              ? { 
+                  type: 'assistant', 
+                  message: result.storyboard!,
+                  isEditable: true
+                }
+              : msg
+          )
+        }));
+      } else if (result.success && result.status === 'generating') {
+        // Continue polling
+        setTimeout(() => pollStoryboardStatus(), 2000);
+      }
+    } catch (error) {
+      console.error('Error polling storyboard status:', error);
+    }
+  }, [state.sessionId]);
+
   // Reset the session
   const resetSession = useCallback(() => {
     localStorage.removeItem(SESSION_STORAGE_KEY);
@@ -328,6 +374,7 @@ export const useStoryChat = () => {
     startEditing,
     cancelEditing,
     setShowGenerateButton,
+    pollStoryboardStatus,
     resetSession,
     clearError,
     checkBackendHealth,

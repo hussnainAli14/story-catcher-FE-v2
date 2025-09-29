@@ -186,6 +186,18 @@ class StoryCatcherAPI {
       return { success: false, error: 'Failed to generate video' };
     }
   }
+
+  // Check storyboard generation status
+  async checkStoryboardStatus(sessionId: string): Promise<{ success: boolean; status?: string; storyboard?: string; error?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/storyboard/status/${sessionId}`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Storyboard status check failed:', error);
+      return { success: false, error: 'Failed to check storyboard status' };
+    }
+  }
 }
 
 export const storyAPI = new StoryCatcherAPI();
