@@ -62,9 +62,6 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
             <h3 className="text-lg font-bold text-black mb-3">
               🎬 Your Generated Video
             </h3>
-            <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 mb-3">
-              DEBUG: currentVideoUrl = {currentVideoUrl}
-            </div>
             <div className="space-y-3">
               {currentVideoUrl.startsWith('videogen://') ? (
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -205,9 +202,6 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
             <h3 className="text-lg font-bold text-black mb-3">
               🎬 Your Generated Video
             </h3>
-            <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 mb-3">
-              DEBUG: currentVideoUrl = {currentVideoUrl}
-            </div>
             <div className="space-y-3">
               {currentVideoUrl.startsWith('videogen://') ? (
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">

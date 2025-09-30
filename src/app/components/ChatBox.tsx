@@ -74,20 +74,20 @@ const ChatBox = ({
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         onKeyDown={handleKeyPress}
-                        className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 font-space-mono text-sm leading-relaxed resize-none focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest focus:ring-opacity-20"
-                        rows={Math.max(3, editText.split('\n').length)}
+                        className="w-full p-4 border border-gray-300 rounded-lg text-gray-700 font-space-mono text-base leading-relaxed resize-none focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest focus:ring-opacity-20 min-h-[200px]"
+                        rows={Math.max(8, editText.split('\n').length)}
                         autoFocus
                     />
                     <div className="flex gap-2 justify-end">
                         <button
                             onClick={handleCancel}
-                            className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                            className="px-4 py-2 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSave}
-                            className="px-3 py-1 text-sm bg-forest text-white rounded hover:bg-green-700 transition-colors"
+                            className="px-4 py-2 text-sm bg-forest text-white rounded hover:bg-green-700 transition-colors"
                         >
                             Save
                         </button>
@@ -115,9 +115,6 @@ const ChatBox = ({
                 <div className="w-full">
                     <div className="mb-3">
                         {message}
-                    </div>
-                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800 mb-3">
-                        DEBUG: videoUrl = {videoUrl}
                     </div>
                     <Storyboard content="" images={images} videoUrl={videoUrl} />
                 </div>
