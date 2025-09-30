@@ -111,6 +111,13 @@ const ChatBox = ({
                         </div>
                     )}
                 </div>
+            ) : videoUrl ? (
+                <div className="w-full">
+                    <div className="mb-3">
+                        {message}
+                    </div>
+                    <Storyboard content="" images={images} videoUrl={videoUrl} />
+                </div>
             ) : (
                 <div className="relative">
                     {message}
