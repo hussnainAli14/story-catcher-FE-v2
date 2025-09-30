@@ -116,6 +116,9 @@ const ChatBox = ({
                     <div className="mb-3">
                         {message}
                     </div>
+                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800 mb-3">
+                        DEBUG: videoUrl = {videoUrl}
+                    </div>
                     <Storyboard content="" images={images} videoUrl={videoUrl} />
                 </div>
             ) : (
