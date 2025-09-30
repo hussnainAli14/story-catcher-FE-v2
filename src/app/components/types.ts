@@ -39,6 +39,7 @@ export type ChatProps = {
     onEditMessage?: (index: number, newMessage: string) => void;
     onStartEditing?: (index: number) => void;
     onCancelEditing?: (index: number) => void;
+    videoGenerated?: boolean;
 }
 
 export type PopupProps = {

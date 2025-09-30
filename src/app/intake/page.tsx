@@ -18,6 +18,7 @@ const Intake = () => {
         isLoading,
         error,
         showGenerateButton,
+        videoGenerated,
         startSession,
         submitAnswer,
         generateVideo,
@@ -138,6 +139,7 @@ const Intake = () => {
                         onEditMessage={editMessage}
                         onStartEditing={startEditing}
                         onCancelEditing={cancelEditing}
+                        videoGenerated={videoGenerated}
                     />
                     
                     {isComplete && (

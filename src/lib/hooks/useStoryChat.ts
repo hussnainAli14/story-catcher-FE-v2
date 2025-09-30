@@ -21,6 +21,7 @@ export interface ChatState {
   isLoading: boolean;
   error: string | null;
   showGenerateButton: boolean;
+  videoGenerated: boolean;
 }
 
 const SESSION_STORAGE_KEY = 'story-catcher-session';
@@ -35,6 +36,7 @@ export const useStoryChat = () => {
     isLoading: false,
     error: null,
     showGenerateButton: false,
+    videoGenerated: false,
   });
 
   // Load session from localStorage on mount
@@ -162,6 +164,7 @@ export const useStoryChat = () => {
               // Update the message with the final video URL
               setState(prev => ({
                 ...prev,
+                videoGenerated: true, // Mark video as generated
                 messages: prev.messages.map(msg => 
                   msg.videoUrl === videoUrl 
                     ? { ...msg, message: 'Your video is ready!', videoUrl: finalVideoUrl, isLoading: false }
@@ -352,6 +355,7 @@ export const useStoryChat = () => {
             const messagesToKeep = prev.messages.length - 1; // Remove loading message
             return {
               ...prev,
+              videoGenerated: true, // Mark video as generated
               messages: [
                 ...prev.messages.slice(0, messagesToKeep),
                 {
@@ -438,6 +442,7 @@ export const useStoryChat = () => {
       isLoading: false,
       error: null,
       showGenerateButton: false,
+      videoGenerated: false,
     });
   }, []);
 
