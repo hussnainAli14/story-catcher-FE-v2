@@ -61,7 +61,7 @@ const ChatBox = ({
     };
 
     return (
-        <div className={`flex max-w-full md:max-w-1/2 px-4 py-2 ${getBoxStyles()} font-space-mono text-forest ${isEditable && !isEditing ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+        <div className={`flex ${isEditing ? 'max-w-full' : 'max-w-full md:max-w-1/2'} px-4 py-2 ${getBoxStyles()} font-space-mono text-forest ${isEditable && !isEditing ? 'cursor-pointer hover:bg-gray-50' : ''}`}
              onClick={isEditable && !isEditing ? onStartEdit : undefined}>
             {isLoading ? (
                 <div className="flex items-center gap-2">
