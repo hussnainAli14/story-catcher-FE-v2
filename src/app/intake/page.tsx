@@ -21,6 +21,7 @@ const Intake = () => {
         videoGenerated,
         startSession,
         submitAnswer,
+        storeEmail,
         generateVideo,
         editMessage,
         startEditing,
@@ -106,7 +107,7 @@ const Intake = () => {
 
     return (
         <ErrorBoundary>
-            {isPopupOpen && <Popup handleClose={handleClosePopup} onGenerateVideo={generateVideo} />}
+            {isPopupOpen && <Popup handleClose={handleClosePopup} onGenerateVideo={storeEmail} />}
             <div className="h-screen flex flex-col" style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
                 <Header />
                 <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>

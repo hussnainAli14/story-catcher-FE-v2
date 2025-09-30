@@ -22,6 +22,7 @@ export interface ChatState {
   error: string | null;
   showGenerateButton: boolean;
   videoGenerated: boolean;
+  tempEmail: string | null; // Store email temporarily until video generation
 }
 
 const SESSION_STORAGE_KEY = 'story-catcher-session';
@@ -37,6 +38,7 @@ export const useStoryChat = () => {
     error: null,
     showGenerateButton: false,
     videoGenerated: false,
+    tempEmail: null,
   });
 
   // Load session from localStorage on mount
@@ -302,8 +304,13 @@ export const useStoryChat = () => {
     }
   }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus]);
 
-  // Generate video from completed session
-  const generateVideo = useCallback(async (email?: string) => {
+  // Store email temporarily (from popup)
+  const storeEmail = useCallback((email?: string) => {
+    setState(prev => ({ ...prev, tempEmail: email || null }));
+  }, []);
+
+  // Generate video from completed session (from Generate Video button)
+  const generateVideo = useCallback(async () => {
     if (!state.sessionId) return;
 
     // Hide the generate button
@@ -333,10 +340,10 @@ export const useStoryChat = () => {
       let result;
       if (storyboardMessage) {
         // Use the edited storyboard from the chat
-        result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, email, state.sessionId);
+        result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, state.tempEmail || undefined, state.sessionId);
       } else {
         // Fallback to session storyboard
-        result = await storyAPI.generateVideoFromSession(state.sessionId, email);
+        result = await storyAPI.generateVideoFromSession(state.sessionId, state.tempEmail || undefined);
       }
       
       if (result.success && result.video_url) {
@@ -396,7 +403,7 @@ export const useStoryChat = () => {
         };
       });
     }
-  }, [state.sessionId, state.messages, pollVideoStatus]);
+  }, [state.sessionId, state.messages, state.tempEmail, pollVideoStatus]);
 
   // Edit a message
   const editMessage = useCallback((messageIndex: number, newMessage: string) => {
@@ -452,6 +459,7 @@ export const useStoryChat = () => {
       error: null,
       showGenerateButton: false,
       videoGenerated: false,
+      tempEmail: null,
     });
   }, []);
 
@@ -464,6 +472,7 @@ export const useStoryChat = () => {
     ...state,
     startSession,
     submitAnswer,
+    storeEmail,
     generateVideo,
     editMessage,
     startEditing,

@@ -19,37 +19,23 @@ const Popup = ({handleClose, onGenerateVideo}: PopupProps) => {
         setShowEmailInput(true);
     }
 
-    const handleSubmitEmail = async () => {
+    const handleSubmitEmail = () => {
         if (!email.trim()) {
             setError('Please enter a valid email address');
             return;
         }
 
-        setIsLoading(true);
-        setError('');
-
-        try {
-            await onGenerateVideo(email);
-            handleClose();
-        } catch (err) {
-            console.error('Error:', err);
-            setError('Something went wrong. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
+        // Just close the popup and pass the email to the parent
+        // Don't start video generation yet
+        onGenerateVideo(email);
+        handleClose();
     }
 
-    const handleCancel = async () => {
-        setIsLoading(true);
-        try {
-            await onGenerateVideo(); // Generate video without email
-            handleClose();
-        } catch (err) {
-            console.error('Error:', err);
-            setError('Something went wrong. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
+    const handleCancel = () => {
+        // Just close the popup without email
+        // Don't start video generation yet
+        onGenerateVideo();
+        handleClose();
     }
 
     return (
