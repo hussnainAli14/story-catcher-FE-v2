@@ -190,6 +190,20 @@ class StoryCatcherAPI {
     }
   }
 
+  // Generate video from custom storyboard
+  async generateVideoFromStoryboard(storyboard: string, email?: string): Promise<{ success: boolean; video_url?: string; message?: string; error?: string }> {
+    try {
+      const response = await this.makeRequest('/video/generate-from-storyboard', 'POST', {
+        storyboard: storyboard,
+        email: email || ''
+      });
+      return response;
+    } catch (error) {
+      console.error('Video generation failed:', error);
+      return { success: false, error: 'Failed to generate video' };
+    }
+  }
+
   // Check storyboard generation status
   async checkStoryboardStatus(sessionId: string): Promise<{ success: boolean; status?: string; storyboard?: string; error?: string }> {
     try {

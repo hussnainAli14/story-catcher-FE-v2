@@ -311,7 +311,21 @@ export const useStoryChat = () => {
     }));
 
     try {
-      const result = await storyAPI.generateVideoFromSession(state.sessionId, email);
+      // Check if there's an edited storyboard in the messages
+      const storyboardMessage = state.messages.find(msg => 
+        msg.type === 'assistant' && 
+        msg.message.includes('**Storyboard:') && 
+        !msg.isLoading
+      );
+      
+      let result;
+      if (storyboardMessage) {
+        // Use the edited storyboard from the chat
+        result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, email);
+      } else {
+        // Fallback to session storyboard
+        result = await storyAPI.generateVideoFromSession(state.sessionId, email);
+      }
       
       if (result.success && result.video_url) {
         // Check if it's a videogen:// URL that needs polling
@@ -369,7 +383,7 @@ export const useStoryChat = () => {
         };
       });
     }
-  }, [state.sessionId]);
+  }, [state.sessionId, state.messages, pollVideoStatus]);
 
   // Edit a message
   const editMessage = useCallback((messageIndex: number, newMessage: string) => {
