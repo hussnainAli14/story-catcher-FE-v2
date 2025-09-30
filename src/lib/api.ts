@@ -191,11 +191,12 @@ class StoryCatcherAPI {
   }
 
   // Generate video from custom storyboard
-  async generateVideoFromStoryboard(storyboard: string, email?: string): Promise<{ success: boolean; video_url?: string; message?: string; error?: string }> {
+  async generateVideoFromStoryboard(storyboard: string, email?: string, sessionId?: string): Promise<{ success: boolean; video_url?: string; message?: string; error?: string }> {
     try {
       const response = await this.makeRequest('/video/generate-from-storyboard', 'POST', {
         storyboard: storyboard,
-        email: email || ''
+        email: email || '',
+        session_id: sessionId || ''
       });
       return response;
     } catch (error) {
@@ -213,6 +214,20 @@ class StoryCatcherAPI {
     } catch (error) {
       console.error('Storyboard status check failed:', error);
       return { success: false, error: 'Failed to check storyboard status' };
+    }
+  }
+
+  // Save final video URL to Supabase
+  async saveVideoToSupabase(sessionId: string, videoUrl: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await this.makeRequest('/video/save-to-supabase', 'POST', {
+        session_id: sessionId,
+        video_url: videoUrl
+      });
+      return response;
+    } catch (error) {
+      console.error('Failed to save video to Supabase:', error);
+      return { success: false, error: 'Failed to save video to Supabase' };
     }
   }
 }

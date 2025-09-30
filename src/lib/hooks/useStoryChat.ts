@@ -161,6 +161,15 @@ export const useStoryChat = () => {
           if (loadingState === 'FULFILLED') {
             const finalVideoUrl = result.result.apiFileSignedUrl;
             if (finalVideoUrl) {
+              // Save final video URL to Supabase if session exists
+              if (state.sessionId) {
+                try {
+                  await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
+                } catch (error) {
+                  console.error('Failed to save video to Supabase:', error);
+                }
+              }
+              
               // Update the message with the final video URL
               setState(prev => ({
                 ...prev,
@@ -190,7 +199,7 @@ export const useStoryChat = () => {
     
     // Start checking after 5 seconds
     setTimeout(checkStatus, 5000);
-  }, []);
+  }, [state.sessionId]);
 
   // Submit an answer
   const submitAnswer = useCallback(async (answer: string) => {
@@ -291,7 +300,7 @@ export const useStoryChat = () => {
         };
       });
     }
-  }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus, pollVideoStatus]);
+  }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus]);
 
   // Generate video from completed session
   const generateVideo = useCallback(async (email?: string) => {
@@ -324,7 +333,7 @@ export const useStoryChat = () => {
       let result;
       if (storyboardMessage) {
         // Use the edited storyboard from the chat
-        result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, email);
+        result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, email, state.sessionId);
       } else {
         // Fallback to session storyboard
         result = await storyAPI.generateVideoFromSession(state.sessionId, email);
