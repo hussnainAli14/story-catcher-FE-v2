@@ -53,6 +53,51 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
   };
   // Parse the storyboard content and format it simply
   const formatStoryboard = (text: string) => {
+    // If no content but we have a video, just show the video
+    if (!text && currentVideoUrl) {
+      return (
+        <div className="storyboard-container">
+          {/* Video Section */}
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-bold text-black mb-3">
+              🎬 Your Generated Video
+            </h3>
+            <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 mb-3">
+              DEBUG: currentVideoUrl = {currentVideoUrl}
+            </div>
+            <div className="space-y-3">
+              {currentVideoUrl.startsWith('videogen://') ? (
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span className="text-blue-800 font-medium">Video is being generated...</span>
+                  </div>
+                  <p className="text-sm text-blue-600 mt-2">
+                    Your video is currently being processed. This usually takes 2-5 minutes. 
+                    The video will appear here once it&apos;s ready.
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Video ID: {currentVideoUrl.replace('videogen://', '')}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <video 
+                    controls 
+                    className="w-full max-w-md mx-auto rounded-lg shadow-sm"
+                    poster={images[0]} // Use first image as poster
+                  >
+                    <source src={currentVideoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     // Split by scenes
     const scenes = text.split(/\*\*Scene \d+:/);
     const titleMatch = text.match(/\*\*Storyboard: "([^"]+)" – ([^*]+)\*\*/);
