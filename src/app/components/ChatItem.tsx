@@ -13,6 +13,7 @@ const ChatItem = ({
     videoUrl,
     isEditable,
     isEditing,
+    videoGenerating,
     onEdit,
     onStartEdit,
     onCancelEdit
@@ -30,6 +31,7 @@ const ChatItem = ({
                 videoUrl={videoUrl}
                 isEditable={isEditable}
                 isEditing={isEditing}
+                videoGenerating={videoGenerating}
                 onEdit={onEdit}
                 onStartEdit={onStartEdit}
                 onCancelEdit={onCancelEdit}

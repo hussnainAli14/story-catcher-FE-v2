@@ -18,6 +18,7 @@ const Intake = () => {
         error,
         showGenerateButton,
         videoGenerated,
+        videoGenerating,
         startSession,
         submitAnswer,
         storeEmail,
@@ -84,10 +85,10 @@ const Intake = () => {
         setIsPopupOpen(false);
     };
 
-    const handleEmailCapture = (email?: string) => {
+    const handleEmailCapture = async (email?: string) => {
         // Store email and generate video
         storeEmail(email);
-        generateVideo();
+        generateVideo(email); // Pass email directly to avoid state timing issues
         setIsPopupOpen(false);
     };
 
@@ -139,6 +140,7 @@ const Intake = () => {
                         onStartEditing={startEditing}
                         onCancelEditing={cancelEditing}
                         videoGenerated={videoGenerated}
+                        videoGenerating={videoGenerating}
                     />
                     
                     {/* Input box positioned right under the chat */}
@@ -154,6 +156,23 @@ const Intake = () => {
                     
                     {isComplete && (
                         <div className="mt-6 text-center space-y-4">
+                            {/* Editing reminder */}
+                            <div className={`p-3 border rounded-lg ${
+                                videoGenerating 
+                                    ? 'bg-orange-50 border-orange-200' 
+                                    : 'bg-yellow-50 border-yellow-200'
+                            }`}>
+                                <p className={`text-sm ${
+                                    videoGenerating ? 'text-orange-800' : 'text-yellow-800'
+                                }`}>
+                                    {videoGenerating ? (
+                                        <>⏳ <strong>Video Generating:</strong> Editing is disabled while your video is being created. You can edit after completion or start a new story.</>
+                                    ) : (
+                                        <>💡 <strong>Tip:</strong> You can edit your storyboard above before generating your video. Look for the "✏️ Edit" button when you hover over the storyboard.</>
+                                    )}
+                                </p>
+                            </div>
+                            
                             {showGenerateButton && (
                                 <button
                                     onClick={handleGenerateVideo}

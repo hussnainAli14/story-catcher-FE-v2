@@ -7,7 +7,8 @@ const Chat = ({
     onEditMessage, 
     onStartEditing, 
     onCancelEditing,
-    videoGenerated = false
+    videoGenerated = false,
+    videoGenerating = false
 }: ChatProps) => {
     const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -29,8 +30,9 @@ const Chat = ({
                     isError={message.isError}
                     images={message.images}
                     videoUrl={message.videoUrl}
-                    isEditable={message.isEditable && !videoGenerated}
+                    isEditable={message.isEditable && !videoGenerated && !videoGenerating}
                     isEditing={message.isEditing}
+                    videoGenerating={videoGenerating}
                     onEdit={(newMessage) => onEditMessage?.(index, newMessage)}
                     onStartEdit={() => onStartEditing?.(index)}
                     onCancelEdit={() => onCancelEditing?.(index)}

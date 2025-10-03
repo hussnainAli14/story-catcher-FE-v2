@@ -5,9 +5,10 @@ interface StoryboardProps {
   content: string;
   images?: string[];
   videoUrl?: string;
+  videoGenerating?: boolean;
 }
 
-const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl }) => {
+const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl, videoGenerating = false }) => {
   const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
 
   // Check video status if it's a processing video
@@ -111,6 +112,32 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl 
           <h2 className="text-lg font-bold text-black">
             🎬 <strong>Storyboard: &ldquo;{title}&rdquo; - {subtitle}</strong>
           </h2>
+        </div>
+
+        {/* Editing Instructions */}
+        <div className={`mb-4 p-3 border rounded-lg ${
+          videoGenerating 
+            ? 'bg-orange-50 border-orange-200' 
+            : 'bg-blue-50 border-blue-200'
+        }`}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className={videoGenerating ? 'text-orange-600' : 'text-blue-600'}>
+              {videoGenerating ? '⏳' : '✏️'}
+            </span>
+            <h3 className={`text-sm font-semibold ${
+              videoGenerating ? 'text-orange-800' : 'text-blue-800'
+            }`}>
+              {videoGenerating ? 'Video Generation in Progress' : 'You can edit your storyboard!'}
+            </h3>
+          </div>
+          <p className={`text-xs ${
+            videoGenerating ? 'text-orange-700' : 'text-blue-700'
+          }`}>
+            {videoGenerating 
+              ? 'Editing is disabled while your video is being generated. You can edit after the video is complete or start a new story.'
+              : 'Click the edit button (✏️) that appears when you hover over the storyboard to make changes before generating your video.'
+            }
+          </p>
         </div>
 
         {/* Simple Scenes */}

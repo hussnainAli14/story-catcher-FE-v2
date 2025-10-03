@@ -7,13 +7,14 @@ const ChatBox = ({
     type="assistant", 
     isLoading, 
     isError, 
-    images, 
+    images,
     videoUrl, 
     isEditable = false,
     isEditing = false,
     onEdit,
     onStartEdit,
-    onCancelEdit
+    onCancelEdit,
+    videoGenerating = false
 }: ChatBoxProps) => {
     const [editText, setEditText] = useState(message);
     
@@ -95,7 +96,7 @@ const ChatBox = ({
                 </div>
             ) : isStoryboard ? (
                 <div className="w-full relative">
-                    <Storyboard content={message} images={images} videoUrl={videoUrl} />
+                    <Storyboard content={message} images={images} videoUrl={videoUrl} videoGenerating={videoGenerating} />
                     {isEditable && (
                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
@@ -103,10 +104,10 @@ const ChatBox = ({
                                     e.stopPropagation();
                                     onStartEdit?.();
                                 }}
-                                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                title="Edit storyboard"
+                                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-lg"
+                                title="Edit storyboard - Click to modify your story before generating video"
                             >
-                                ✏️
+                                ✏️ Edit
                             </button>
                         </div>
                     )}
@@ -128,10 +129,10 @@ const ChatBox = ({
                                     e.stopPropagation();
                                     onStartEdit?.();
                                 }}
-                                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                title="Edit storyboard"
+                                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-lg"
+                                title="Edit storyboard - Click to modify your story before generating video"
                             >
-                                ✏️
+                                ✏️ Edit
                             </button>
                         </div>
                     )}

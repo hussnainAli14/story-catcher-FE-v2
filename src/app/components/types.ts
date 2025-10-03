@@ -32,6 +32,7 @@ export type ChatBoxProps = AvatarProps & {
     onEdit?: (newMessage: string) => void;
     onStartEdit?: () => void;
     onCancelEdit?: () => void;
+    videoGenerating?: boolean;
 }
 
 export type ChatProps = {
@@ -40,6 +41,7 @@ export type ChatProps = {
     onStartEditing?: (index: number) => void;
     onCancelEditing?: (index: number) => void;
     videoGenerated?: boolean;
+    videoGenerating?: boolean;
 }
 
 export type PopupProps = {

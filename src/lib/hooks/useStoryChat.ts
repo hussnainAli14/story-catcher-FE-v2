@@ -22,7 +22,9 @@ export interface ChatState {
   error: string | null;
   showGenerateButton: boolean;
   videoGenerated: boolean;
+  videoGenerating: boolean; // Track when video generation has started
   tempEmail: string | null; // Store email temporarily until video generation
+  hasEmailForSupabase: boolean; // Track if email was provided for Supabase save
 }
 
 const SESSION_STORAGE_KEY = 'story-catcher-session';
@@ -38,7 +40,9 @@ export const useStoryChat = () => {
     error: null,
     showGenerateButton: false,
     videoGenerated: false,
+    videoGenerating: false,
     tempEmail: null,
+    hasEmailForSupabase: false,
   });
 
   // Load session from localStorage on mount
@@ -149,7 +153,7 @@ export const useStoryChat = () => {
   }, [state.sessionId]);
 
   // Poll video status until completion
-  const pollVideoStatus = useCallback(async (videoUrl: string) => {
+  const pollVideoStatus = useCallback(async (videoUrl: string, hasEmailForSupabase?: boolean) => {
     if (!videoUrl.startsWith('videogen://')) return;
     
     const apiFileId = videoUrl.replace('videogen://', '');
@@ -164,13 +168,23 @@ export const useStoryChat = () => {
           if (loadingState === 'FULFILLED') {
             const finalVideoUrl = result.result.apiFileSignedUrl;
             if (finalVideoUrl) {
-              // Save final video URL to Supabase if session exists
-              if (state.sessionId) {
+              // Save final video URL to Supabase if session exists AND email was provided
+              let supabaseSaveSuccess = true;
+              const shouldSaveToSupabase = hasEmailForSupabase !== undefined ? hasEmailForSupabase : state.hasEmailForSupabase;
+              
+              if (state.sessionId && shouldSaveToSupabase) {
                 try {
-                  await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
+                  const saveResult = await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
+                  if (!saveResult.success) {
+                    console.warn('Video saved but Supabase save failed:', saveResult.error);
+                    supabaseSaveSuccess = false;
+                  }
                 } catch (error) {
                   console.error('Failed to save video to Supabase:', error);
+                  supabaseSaveSuccess = false;
                 }
+              } else if (state.sessionId && !shouldSaveToSupabase) {
+                supabaseSaveSuccess = true; // This is expected behavior
               }
               
               // Update the message with the final video URL
@@ -179,7 +193,16 @@ export const useStoryChat = () => {
                 videoGenerated: true, // Mark video as generated
                 messages: prev.messages.map(msg => 
                   msg.videoUrl === videoUrl 
-                    ? { ...msg, message: 'Your video is ready!', videoUrl: finalVideoUrl, isLoading: false }
+                    ? { 
+                        type: 'assistant',
+                  message: supabaseSaveSuccess 
+                    ? (shouldSaveToSupabase 
+                        ? 'Your video is ready!' 
+                        : 'Your video is ready! (Saved locally - no email provided for database storage)')
+                    : 'Your video is ready! (Note: Video saved locally but not to our database)',
+                        videoUrl: finalVideoUrl, 
+                        isLoading: false 
+                      }
                     : msg
                 )
               }));
@@ -202,7 +225,7 @@ export const useStoryChat = () => {
     
     // Start checking after 5 seconds
     setTimeout(checkStatus, 5000);
-  }, [state.sessionId]);
+  }, [state.sessionId, state.hasEmailForSupabase]);
 
   // Submit an answer
   const submitAnswer = useCallback(async (answer: string) => {
@@ -308,15 +331,23 @@ export const useStoryChat = () => {
 
   // Store email temporarily (from popup)
   const storeEmail = useCallback((email?: string) => {
-    setState(prev => ({ ...prev, tempEmail: email || null }));
+    setState(prev => ({ 
+      ...prev, 
+      tempEmail: email || null,
+      hasEmailForSupabase: !!email // Track if email was provided
+    }));
   }, []);
 
   // Generate video from completed session (from Generate Video button)
-  const generateVideo = useCallback(async () => {
+  const generateVideo = useCallback(async (email?: string) => {
     if (!state.sessionId) return;
 
-    // Hide the generate button
-    setState(prev => ({ ...prev, showGenerateButton: false }));
+    // Use provided email or fall back to stored email
+    const emailToUse = email || state.tempEmail;
+    const hasEmail = !!emailToUse;
+
+    // Hide the generate button and disable editing
+    setState(prev => ({ ...prev, showGenerateButton: false, videoGenerating: true }));
 
     // Add video generation message
     setState(prev => ({
@@ -342,10 +373,10 @@ export const useStoryChat = () => {
       let result;
       if (storyboardMessage) {
         // Use the edited storyboard from the chat
-        result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, state.tempEmail || undefined, state.sessionId);
+        result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, emailToUse || undefined, state.sessionId);
       } else {
         // Fallback to session storyboard
-        result = await storyAPI.generateVideoFromSession(state.sessionId, state.tempEmail || undefined);
+        result = await storyAPI.generateVideoFromSession(state.sessionId, emailToUse || undefined);
       }
       
       if (result.success && result.video_url) {
@@ -366,7 +397,7 @@ export const useStoryChat = () => {
           }));
           
           // Start polling for video completion
-          pollVideoStatus(result.video_url);
+          pollVideoStatus(result.video_url, hasEmail);
         } else {
           // Direct video URL, show immediately
           setState(prev => {
@@ -394,6 +425,7 @@ export const useStoryChat = () => {
         return {
           ...prev,
           showGenerateButton: true, // Show button again on error
+          videoGenerating: false, // Reset video generating state on error
           messages: [
             ...prev.messages.slice(0, messagesToKeep),
             {
@@ -461,7 +493,9 @@ export const useStoryChat = () => {
       error: null,
       showGenerateButton: false,
       videoGenerated: false,
+      videoGenerating: false,
       tempEmail: null,
+      hasEmailForSupabase: false,
     });
   }, []);
 
