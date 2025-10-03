@@ -143,6 +143,17 @@ const Intake = () => {
                         videoGenerated={videoGenerated}
                     />
                     
+                    {/* Input box positioned right under the chat */}
+                    <div className='mt-6'>
+                        <ChatInput 
+                            placeholder={getPlaceholderText()}
+                            value={userInput}
+                            onChange={handleInputChange}
+                            onClick={handleSubmit}
+                            disabled={isLoading || isComplete}
+                        />
+                    </div>
+                    
                     {isComplete && (
                         <div className="mt-6 text-center space-y-4">
                             {showGenerateButton && (
@@ -161,16 +172,6 @@ const Intake = () => {
                             </button>
                         </div>
                     )}
-                </div>
-                
-                <div className='sm:px-10 py-4'>
-                    <ChatInput 
-                        placeholder={getPlaceholderText()}
-                        value={userInput}
-                        onChange={handleInputChange}
-                        onClick={handleSubmit}
-                        disabled={isLoading || isComplete}
-                    />
                 </div>
             </div>
         </ErrorBoundary>

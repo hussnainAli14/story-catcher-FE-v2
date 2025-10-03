@@ -1,5 +1,4 @@
 "use client"
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { storyAPI } from '@/lib/api';
@@ -83,12 +82,11 @@ export default function Home() {
                 <h1 className='text-3xl text-center font-tektur text-forest'>Story Catcher</h1>
                 <h4 className='text-center font-normal text-slate'>Your life changing moment in video.</h4>
                 
-                <DotLottieReact
-                    src="https://lottie.host/45485b95-ce71-466e-9b7d-cdd2be88d721/urJFCKyByY.lottie"
-                    loop
-                    autoplay
-                    className='sm:w-100 sm:h-50 w-50 h-30'
-                />
+                <div className="text-center py-8">
+                    <div className="text-lg font-space-mono text-gray-600">
+                        Please wait...
+                    </div>
+                </div>
 
                 {/* Health Status */}
                 <div className="flex flex-col items-center gap-4 mt-6">
