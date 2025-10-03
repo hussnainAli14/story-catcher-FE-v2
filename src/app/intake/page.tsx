@@ -5,7 +5,6 @@ import { useStoryChat } from '@/lib/hooks/useStoryChat'
 
 const Intake = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const [popupShown, setPopupShown] = useState(false);
     const [userInput, setUserInput] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
     
@@ -26,7 +25,6 @@ const Intake = () => {
         editMessage,
         startEditing,
         cancelEditing,
-        setShowGenerateButton,
         resetSession,
         clearError,
         checkBackendHealth
@@ -51,21 +49,11 @@ const Intake = () => {
         }
     }, [hasStarted, sessionId, messages.length, startSession]);
 
-    // Show popup 3 seconds after storyboard is generated (only once)
-    useEffect(() => {
-        if (isComplete && messages.some(msg => msg.message.includes('**Storyboard:')) && !popupShown) {
-            const timer = setTimeout(() => {
-                setIsPopupOpen(true);
-                setPopupShown(true);
-            }, 3000); // 3 seconds delay
+    // No longer show popup early - email capture moved to Generate Video button
 
-            return () => clearTimeout(timer);
-        }
-    }, [isComplete, messages, popupShown]);
-
-    const handleClosePopup = () => {
-        setIsPopupOpen(false);
-        setShowGenerateButton(); // Show generate button after popup closes
+    const handleGenerateVideo = () => {
+        // Show email capture popup before generating video
+        setIsPopupOpen(true);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +77,17 @@ const Intake = () => {
         resetSession();
         setHasStarted(false);
         setUserInput('');
-        setPopupShown(false);
+        setIsPopupOpen(false);
+    };
+
+    const handleClosePopup = () => {
+        setIsPopupOpen(false);
+    };
+
+    const handleEmailCapture = (email?: string) => {
+        // Store email and generate video
+        storeEmail(email);
+        generateVideo();
         setIsPopupOpen(false);
     };
 
@@ -107,7 +105,7 @@ const Intake = () => {
 
     return (
         <ErrorBoundary>
-            {isPopupOpen && <Popup handleClose={handleClosePopup} onGenerateVideo={storeEmail} />}
+            {isPopupOpen && <Popup handleClose={handleClosePopup} onGenerateVideo={handleEmailCapture} />}
             <div className="h-screen flex flex-col" style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
                 <Header />
                 <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>
@@ -158,7 +156,7 @@ const Intake = () => {
                         <div className="mt-6 text-center space-y-4">
                             {showGenerateButton && (
                                 <button
-                                    onClick={() => generateVideo()}
+                                    onClick={handleGenerateVideo}
                                     className="px-6 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono"
                                 >
                                     Generate Video

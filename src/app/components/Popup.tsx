@@ -44,10 +44,10 @@ const Popup = ({handleClose, onGenerateVideo}: PopupProps) => {
                 <button className='absolute top-2 right-4 text-gray-500 hover:text-gray-700 text-4xl cursor-pointer' onClick={handleClose}>×</button>
                 
                 <div className='pb-6'>
-                    <h1 className='text-2xl font-mono-space font-bold text-forest pb-[1px] text-center'>Your Storyboard is Ready!</h1>
+                    <h1 className='text-2xl font-mono-space font-bold text-forest pb-[1px] text-center'>Generate Your Video!</h1>
                     <p className='text-sm text-slate text-center'>
                         {!showEmailInput 
-                            ? 'Would you like to register your email to receive your video when it\'s ready?'
+                            ? 'Would you like to provide your email to receive your video when it\'s ready?'
                             : 'Enter your email to get your video delivered to your inbox.'
                         }
                     </p>
@@ -68,13 +68,13 @@ const Popup = ({handleClose, onGenerateVideo}: PopupProps) => {
                         <>
                             <Button 
                                 onClick={handleCancel} 
-                                text={isLoading ? 'Generating...' : 'Skip'} 
+                                text={isLoading ? 'Generating...' : 'Generate Without Email'} 
                                 bgColor='bg-slate' 
                                 disabled={isLoading} 
                             />
                             <Button 
                                 onClick={handleRegister} 
-                                text='Register Email' 
+                                text='Provide Email' 
                                 disabled={isLoading} 
                             />
                         </>
