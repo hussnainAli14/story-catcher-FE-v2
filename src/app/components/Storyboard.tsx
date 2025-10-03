@@ -12,20 +12,39 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
   const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
 
   // Function to download video
-  const downloadVideo = (url: string) => {
+  const downloadVideo = async (url: string) => {
     try {
-      // Create a temporary anchor element to trigger download
+      // Fetch the video file as a blob
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch video');
+      }
+      
+      const blob = await response.blob();
+      
+      // Create a blob URL and download it
+      const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = blobUrl;
       link.download = `story-video-${Date.now()}.mp4`;
-      link.target = '_blank';
+      link.style.display = 'none';
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error('Error downloading video:', error);
-      // Fallback: open video in new tab
-      window.open(url, '_blank');
+      // Fallback: try direct download with download attribute
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `story-video-${Date.now()}.mp4`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
