@@ -128,6 +128,7 @@ export const useStoryChat = () => {
         // Replace the loading message with the completed storyboard
         setState(prev => ({
           ...prev,
+          showGenerateButton: true, // Show generate button when storyboard is complete
           messages: prev.messages.map((msg, index) => 
             index === prev.messages.length - 1 && msg.isLoading
               ? { 
@@ -268,6 +269,7 @@ export const useStoryChat = () => {
           currentQuestion: session.question_number || prev.currentQuestion + 1,
           totalQuestions: session.total_questions || prev.totalQuestions,
           isComplete: session.session_complete || false,
+          showGenerateButton: session.session_complete && session.storyboard ? true : prev.showGenerateButton,
           // Keep user message, remove loading message, add new response
           messages: [
             ...prev.messages.slice(0, messagesToKeep),
