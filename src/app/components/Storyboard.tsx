@@ -11,6 +11,24 @@ interface StoryboardProps {
 const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl, videoGenerating = false }) => {
   const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
 
+  // Function to download video
+  const downloadVideo = (url: string) => {
+    try {
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `story-video-${Date.now()}.mp4`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading video:', error);
+      // Fallback: open video in new tab
+      window.open(url, '_blank');
+    }
+  };
+
   // Check video status if it's a processing video
   useEffect(() => {
     if (videoUrl && videoUrl.startsWith('videogen://')) {
@@ -88,6 +106,14 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                     <source src={currentVideoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
+                  <div className="mt-3 text-center">
+                    <button
+                      onClick={() => downloadVideo(currentVideoUrl)}
+                      className="px-4 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono text-sm flex items-center gap-2 mx-auto"
+                    >
+                      📥 Download Video
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -254,6 +280,14 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                     <source src={currentVideoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
+                  <div className="mt-3 text-center">
+                    <button
+                      onClick={() => downloadVideo(currentVideoUrl)}
+                      className="px-4 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono text-sm flex items-center gap-2 mx-auto"
+                    >
+                      📥 Download Video
+                    </button>
+                  </div>
                 </>
               )}
             </div>
