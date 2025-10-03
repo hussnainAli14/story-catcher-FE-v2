@@ -10,41 +10,47 @@ interface StoryboardProps {
 
 const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl, videoGenerating = false }) => {
   const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
+  const [showDownloadInstructions, setShowDownloadInstructions] = useState(false);
 
   // Function to download video
   const downloadVideo = async (url: string) => {
     try {
-      // Fetch the video file as a blob
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch video');
-      }
+      // Method 1: Try to force download by modifying the URL
+      // Some servers respect the 'download' parameter
+      const downloadUrl = url.includes('?') 
+        ? `${url}&download=true` 
+        : `${url}?download=true`;
       
-      const blob = await response.blob();
-      
-      // Create a blob URL and download it
-      const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = blobUrl;
+      link.href = downloadUrl;
       link.download = `story-video-${Date.now()}.mp4`;
       link.style.display = 'none';
+      link.setAttribute('target', '_self'); // Force same window
       
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(blobUrl);
+      // Method 2: If that doesn't work, try with Content-Disposition header simulation
+      setTimeout(() => {
+        try {
+          const link2 = document.createElement('a');
+          link2.href = url;
+          link2.download = `story-video-${Date.now()}.mp4`;
+          link2.style.display = 'none';
+          document.body.appendChild(link2);
+          link2.click();
+          document.body.removeChild(link2);
+        } catch (e) {
+          console.log('Second download attempt failed');
+        }
+      }, 100);
+      
     } catch (error) {
       console.error('Error downloading video:', error);
-      // Fallback: try direct download with download attribute
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `story-video-${Date.now()}.mp4`;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Final fallback: show user instructions
+      setShowDownloadInstructions(true);
+      setTimeout(() => setShowDownloadInstructions(false), 5000); // Hide after 5 seconds
     }
   };
 
@@ -132,6 +138,11 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                     >
                       📥 Download Video
                     </button>
+                    {showDownloadInstructions && (
+                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                        💡 If download doesn't start automatically, right-click on the video above and select "Save video as..."
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -306,6 +317,11 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                     >
                       📥 Download Video
                     </button>
+                    {showDownloadInstructions && (
+                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                        💡 If download doesn't start automatically, right-click on the video above and select "Save video as..."
+                      </div>
+                    )}
                   </div>
                 </>
               )}
