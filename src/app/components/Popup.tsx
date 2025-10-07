@@ -7,7 +7,7 @@ import { PopupProps } from './types';
 const Popup = ({handleClose, onGenerateVideo}: PopupProps) => {
     const [email, setEmail] = useState('');
     const [showEmailInput, setShowEmailInput] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading] = useState(false);
     const [error, setError] = useState('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

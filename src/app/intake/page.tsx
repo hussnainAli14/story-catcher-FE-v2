@@ -168,7 +168,7 @@ const Intake = () => {
                                     {videoGenerating ? (
                                         <>⏳ <strong>Video Generating:</strong> Editing is disabled while your video is being created. You can edit after completion or start a new story.</>
                                     ) : (
-                                        <>💡 <strong>Tip:</strong> You can edit your storyboard above before generating your video. Look for the "✏️ Edit" button when you hover over the storyboard.</>
+                                        <>💡 <strong>Tip:</strong> You can edit your storyboard above before generating your video. Look for the &quot;✏️ Edit&quot; button when you hover over the storyboard.</>
                                     )}
                                 </p>
                             </div>

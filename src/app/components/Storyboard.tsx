@@ -41,7 +41,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
           document.body.appendChild(link2);
           link2.click();
           document.body.removeChild(link2);
-        } catch (e) {
+        } catch {
           console.log('Second download attempt failed');
         }
       }, 100);
@@ -140,7 +140,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                     </button>
                     {showDownloadInstructions && (
                       <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-                        💡 If download doesn't start automatically, right-click on the video above and select "Save video as..."
+                        💡 If download doesn&apos;t start automatically, right-click on the video above and select &quot;Save video as...&quot;
                       </div>
                     )}
                   </div>
@@ -319,7 +319,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                     </button>
                     {showDownloadInstructions && (
                       <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-                        💡 If download doesn't start automatically, right-click on the video above and select "Save video as..."
+                        💡 If download doesn&apos;t start automatically, right-click on the video above and select &quot;Save video as...&quot;
                       </div>
                     )}
                   </div>
