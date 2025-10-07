@@ -68,13 +68,13 @@ const Popup = ({handleClose, onGenerateVideo}: PopupProps) => {
                         <>
                             <Button 
                                 onClick={handleCancel} 
-                                text={isLoading ? 'Generating...' : 'Generate Without Email'} 
+                                text={isLoading ? 'Generating...' : 'Skip Email'} 
                                 bgColor='bg-slate' 
                                 disabled={isLoading} 
                             />
                             <Button 
                                 onClick={handleRegister} 
-                                text='Provide Email' 
+                                text='Enter Email' 
                                 disabled={isLoading} 
                             />
                         </>
@@ -88,7 +88,7 @@ const Popup = ({handleClose, onGenerateVideo}: PopupProps) => {
                             />
                             <Button 
                                 onClick={handleSubmitEmail} 
-                                text={isLoading ? 'Generating...' : 'Generate Video'} 
+                                text={isLoading ? 'Generating...' : 'Register'} 
                                 disabled={isLoading || !email.trim()} 
                             />
                         </>
