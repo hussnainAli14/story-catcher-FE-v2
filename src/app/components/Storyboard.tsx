@@ -15,40 +15,30 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
   // Function to download video
   const downloadVideo = async (url: string) => {
     try {
-      // Method 1: Try to force download by modifying the URL
-      // Some servers respect the 'download' parameter
-      const downloadUrl = url.includes('?') 
-        ? `${url}&download=true` 
-        : `${url}?download=true`;
+      // Fetch the video as a blob and create a download link
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch video');
+      }
+      
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
       
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = `story-video-${Date.now()}.mp4`;
       link.style.display = 'none';
-      link.setAttribute('target', '_self'); // Force same window
       
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      // Method 2: If that doesn't work, try with Content-Disposition header simulation
-      setTimeout(() => {
-        try {
-          const link2 = document.createElement('a');
-          link2.href = url;
-          link2.download = `story-video-${Date.now()}.mp4`;
-          link2.style.display = 'none';
-          document.body.appendChild(link2);
-          link2.click();
-          document.body.removeChild(link2);
-        } catch {
-          console.log('Second download attempt failed');
-        }
-      }, 100);
+      // Clean up the object URL
+      window.URL.revokeObjectURL(downloadUrl);
       
     } catch (error) {
       console.error('Error downloading video:', error);
-      // Final fallback: show user instructions
+      // Fallback: show user instructions
       setShowDownloadInstructions(true);
       setTimeout(() => setShowDownloadInstructions(false), 5000); // Hide after 5 seconds
     }
