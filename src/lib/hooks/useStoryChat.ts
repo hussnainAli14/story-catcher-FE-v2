@@ -83,7 +83,7 @@ export const useStoryChat = () => {
   }, []);
 
   // Start a new story session
-  const startSession = useCallback(async (message: string) => {
+  const startSession = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
@@ -93,7 +93,7 @@ export const useStoryChat = () => {
         throw new Error('Backend server is not available. Please check the server status.');
       }
 
-      const session: StorySession = await storyAPI.startSession(message);
+      const session: StorySession = await storyAPI.startSession();
       
       setState(prev => ({
         ...prev,
@@ -102,7 +102,7 @@ export const useStoryChat = () => {
         totalQuestions: session.total_questions || 4,
         messages: [
           { type: 'assistant', message: session.message },
-          { type: 'assistant', message: session.question?.text || '' }
+          { type: 'assistant', message: session.question || '' }
         ],
         isLoading: false,
         error: null,
@@ -251,8 +251,7 @@ export const useStoryChat = () => {
     try {
       const session: StorySession = await storyAPI.submitAnswer(
         state.sessionId, 
-        answer, 
-        state.currentQuestion
+        answer
       );
 
       const newMessages: ChatMessage[] = [
@@ -279,7 +278,7 @@ export const useStoryChat = () => {
         // Add the next question
         newMessages.push({ 
           type: 'assistant', 
-          message: session.question.text 
+          message: session.question
         });
       }
 

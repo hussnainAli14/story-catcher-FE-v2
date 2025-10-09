@@ -46,7 +46,7 @@ const Intake = () => {
     useEffect(() => {
         if (!hasStarted && !sessionId && messages.length === 0) {
             setHasStarted(true);
-            startSession("I'm ready");
+            startSession();
         }
     }, [hasStarted, sessionId, messages.length, startSession]);
 

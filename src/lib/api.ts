@@ -15,7 +15,7 @@ const getApiBaseUrl = (): string => {
   }
   
   // Production fallback
-  return 'https://story-catcher-backend.onrender.com/api';
+  return 'https://story-catcher-backend-v2.onrender.com/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -23,12 +23,8 @@ const API_BASE_URL = getApiBaseUrl();
 export interface StorySession {
   session_id: string;
   message: string;
-  question?: {
-    id: number;
-    text: string;
-    category: string;
-    order: number;
-  };
+  question?: string;
+  question_id?: string;
   question_number?: number;
   total_questions?: number;
   session_complete?: boolean;
@@ -43,12 +39,8 @@ export interface ApiResponse {
   message?: string;
   error?: string;
   session_id?: string;
-  question?: {
-    id: number;
-    text: string;
-    category: string;
-    order: number;
-  };
+  question?: string;
+  question_id?: string;
   question_number?: number;
   total_questions?: number;
   session_complete?: boolean;
@@ -92,8 +84,8 @@ class StoryCatcherAPI {
   }
 
   // Start a new story session
-  async startSession(message: string): Promise<StorySession> {
-    const response = await this.makeRequest('/story/start', 'POST', { message });
+  async startSession(): Promise<StorySession> {
+    const response = await this.makeRequest('/story/start', 'POST', {});
     
     if (!response.success) {
       throw new Error(response.message || 'Failed to start session');
@@ -103,6 +95,7 @@ class StoryCatcherAPI {
       session_id: response.session_id!,
       message: response.message!,
       question: response.question,
+      question_id: response.question_id,
       question_number: response.question_number,
       total_questions: response.total_questions,
       session_complete: response.session_complete || false,
@@ -110,11 +103,10 @@ class StoryCatcherAPI {
   }
 
   // Submit an answer to a question
-  async submitAnswer(sessionId: string, answer: string, questionNumber: number): Promise<StorySession> {
+  async submitAnswer(sessionId: string, answer: string): Promise<StorySession> {
     const response = await this.makeRequest('/story/answer', 'POST', {
       session_id: sessionId,
       answer,
-      question_number: questionNumber,
     });
 
     if (!response.success) {
@@ -125,6 +117,7 @@ class StoryCatcherAPI {
       session_id: sessionId,
       message: response.message!,
       question: response.question,
+      question_id: response.question_id,
       question_number: response.question_number,
       total_questions: response.total_questions,
       session_complete: response.session_complete || false,
@@ -147,6 +140,7 @@ class StoryCatcherAPI {
       session_id: sessionId,
       message: response.message || '',
       question: response.question,
+      question_id: response.question_id,
       question_number: response.question_number,
       total_questions: response.total_questions,
       session_complete: response.session_complete || false,
