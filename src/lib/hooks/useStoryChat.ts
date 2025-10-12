@@ -369,10 +369,17 @@ export const useStoryChat = () => {
         !msg.isLoading
       );
       
-      // Always use VideoGen outline workflow
-      // If storyboard was edited, the backend will use the stored outline
-      // (Editing updates are handled separately - see editMessage function)
-      const result = await storyAPI.generateVideoWithVideoGenOutline(state.sessionId, emailToUse || undefined);
+      // Check if storyboard was edited
+      let result;
+      if (storyboardMessage) {
+        // User edited the storyboard - use the edited text
+        console.log('Using edited storyboard for video generation');
+        result = await storyAPI.generateVideoFromEditedStoryboard(storyboardMessage.message, state.sessionId, emailToUse || undefined);
+      } else {
+        // No edits - use the original VideoGen outline
+        console.log('Using original outline for video generation');
+        result = await storyAPI.generateVideoWithVideoGenOutline(state.sessionId, emailToUse || undefined);
+      }
       
       if (result.success && result.video_url) {
         // Check if it's a videogen:// URL that needs polling

@@ -184,6 +184,21 @@ class StoryCatcherAPI {
     }
   }
 
+  // Generate video from EDITED storyboard text
+  async generateVideoFromEditedStoryboard(storyboard: string, sessionId: string, email?: string): Promise<{ success: boolean; video_url?: string; outline?: Record<string, unknown>; message?: string; error?: string }> {
+    try {
+      const response = await this.makeRequest('/video/generate-with-edited-storyboard', 'POST', {
+        session_id: sessionId,
+        storyboard: storyboard,
+        email: email || ''
+      });
+      return response;
+    } catch (error) {
+      console.error('Video generation from edited storyboard failed:', error);
+      return { success: false, error: 'Failed to generate video from edited storyboard' };
+    }
+  }
+
   // Generate video from completed session (OLD METHOD - keeping for backward compatibility)
   async generateVideoFromSession(sessionId: string, email?: string): Promise<{ success: boolean; video_url?: string; message?: string; error?: string }> {
     try {
