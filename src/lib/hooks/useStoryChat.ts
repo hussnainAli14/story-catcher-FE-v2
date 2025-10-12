@@ -291,7 +291,7 @@ export const useStoryChat = () => {
           currentQuestion: session.question_number || prev.currentQuestion + 1,
           totalQuestions: session.total_questions || prev.totalQuestions,
           isComplete: session.session_complete || false,
-          showGenerateButton: session.session_complete && session.storyboard ? true : prev.showGenerateButton,
+          showGenerateButton: session.session_complete ? true : prev.showGenerateButton,
           // Keep user message, remove loading message, add new response
           messages: [
             ...prev.messages.slice(0, messagesToKeep),
