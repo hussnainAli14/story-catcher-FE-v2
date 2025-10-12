@@ -142,22 +142,65 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
       );
     }
     
-    // Split by scenes
-    const scenes = text.split(/\*\*Scene \d+:/);
-    const titleMatch = text.match(/\*\*Storyboard: "([^"]+)" – ([^*]+)\*\*/);
+    // Parse the new storyboard format
+    const lines = text.split('\n');
+    let title = 'Your Story Outline';
+    let subtitle = '';
+    const sceneContent: { number: number; text: string }[] = [];
     
-    if (!titleMatch) return text;
-
-    const title = titleMatch[1];
-    const subtitle = titleMatch[2];
+    let currentScene = 0;
+    let currentText: string[] = [];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Extract title
+      if (trimmedLine.startsWith('**Storyboard:')) {
+        title = trimmedLine.replace(/\*\*Storyboard:\s*/, '').replace(/\*\*/g, '');
+      }
+      // Extract subtitle/description
+      else if (trimmedLine.startsWith('*This is')) {
+        subtitle = trimmedLine.replace(/\*/g, '');
+      }
+      // Scene header
+      else if (trimmedLine.match(/\*\*Scene\s+\d+:\*\*/)) {
+        // Save previous scene if exists
+        if (currentScene > 0 && currentText.length > 0) {
+          sceneContent.push({ number: currentScene, text: currentText.join(' ').trim() });
+          currentText = [];
+        }
+        // Start new scene
+        const sceneMatch = trimmedLine.match(/\*\*Scene\s+(\d+):\*\*/);
+        if (sceneMatch) {
+          currentScene = parseInt(sceneMatch[1]);
+        }
+      }
+      // Scene content (not empty, not tip line)
+      else if (trimmedLine && !trimmedLine.startsWith('💡') && currentScene > 0) {
+        currentText.push(trimmedLine);
+      }
+    }
+    
+    // Add last scene
+    if (currentScene > 0 && currentText.length > 0) {
+      sceneContent.push({ number: currentScene, text: currentText.join(' ').trim() });
+    }
+    
+    // If no scenes found, return simple text rendering
+    if (sceneContent.length === 0) {
+      return <div className="storyboard-container whitespace-pre-wrap">{text}</div>;
+    }
 
     return (
       <div className="storyboard-container">
-        {/* Simple Title */}
+        {/* Title */}
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-black">
-            🎬 <strong>Storyboard: &ldquo;{title}&rdquo; - {subtitle}</strong>
+          <h2 className="text-xl font-bold text-black">
+            🎬 {title}
           </h2>
+          {subtitle && (
+            <p className="text-sm text-gray-600 mt-1 italic">{subtitle}</p>
+          )}
         </div>
 
         {/* Editing Instructions */}
@@ -186,87 +229,25 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
           </p>
         </div>
 
-        {/* Simple Scenes */}
+        {/* Scene content - Clean layout */}
         <div className="space-y-4">
-          {scenes.slice(1).map((scene, index) => {
-            const sceneNumber = index + 1;
-            const sceneMatch = scene.match(/^: "([^"]+)"\*\*/);
-            const sceneName = sceneMatch ? sceneMatch[1] : `Scene ${sceneNumber}`;
-            
-            // Extract elements
-            const visualMatch = scene.match(/\• \*\*Visual\*\*: ([^\n]+)/);
-            const settingMatch = scene.match(/\• \*\*Setting\*\*: ([^\n]+)/);
-            const actionMatch = scene.match(/\• \*\*Action\*\*: ([^\n]+)/);
-            const moodMatch = scene.match(/\• \*\*Mood\*\*: ([^\n]+)/);
-            const soundMatch = scene.match(/\• \*\*Sound\*\*: ([^\n]+)/);
-            const transitionMatch = scene.match(/\• \*\*Transition\*\*: ([^\n]+)/);
-
-            return (
-              <div key={index} className="scene-container">
-                <h3 className="text-base font-bold text-black mb-2">
-                  <strong>Scene {sceneNumber}: &ldquo;{sceneName}&rdquo;</strong>
-                </h3>
-                
-                {/* Display image if available */}
-                {images[index] && (
-                  <div className="mb-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={images[index]} 
-                      alt={`Scene ${sceneNumber}: ${sceneName}`}
-                      className="w-full max-w-md rounded-lg shadow-sm border"
-                    />
-                  </div>
-                )}
-                
-                <div className="space-y-1 ml-4">
-                  {visualMatch && (
-                    <div className="element-item">
-                      <span className="font-bold">• <strong>Visual</strong>:</span>
-                      <span className="ml-1">{visualMatch[1]}</span>
-                    </div>
-                  )}
-                  
-                  {(settingMatch || actionMatch) && (
-                    <div className="element-item">
-                      <span className="font-bold">
-                        • <strong>{settingMatch ? 'Setting' : 'Action'}</strong>:
-                      </span>
-                      <span className="ml-1">
-                        {settingMatch ? settingMatch[1] : actionMatch?.[1]}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {moodMatch && (
-                    <div className="element-item">
-                      <span className="font-bold">• <strong>Mood</strong>:</span>
-                      <span className="ml-1">{moodMatch[1]}</span>
-                    </div>
-                  )}
-                  
-                  {soundMatch && (
-                    <div className="element-item">
-                      <span className="font-bold">• <strong>Sound</strong>:</span>
-                      <span className="ml-1">{soundMatch[1]}</span>
-                    </div>
-                  )}
-                  
-                  {transitionMatch && (
-                    <div className="element-item">
-                      <span className="font-bold">• <strong>Transition</strong>:</span>
-                      <span className="ml-1">{transitionMatch[1]}</span>
-                    </div>
-                  )}
+          {sceneContent.map((scene) => (
+            <div key={scene.number} className="scene-item p-4 bg-white rounded-lg border border-gray-300 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-forest text-white text-base font-bold">
+                    {scene.number}
+                  </span>
                 </div>
-                
-                {/* Simple horizontal line between scenes */}
-                {index < scenes.length - 2 && (
-                  <hr className="my-4 border-gray-300" />
-                )}
+                <div className="flex-1">
+                  <h4 className="text-base font-bold text-gray-800 mb-2">Scene {scene.number}</h4>
+                  <p className="text-sm text-gray-900 leading-relaxed">
+                    {scene.text}
+                  </p>
+                </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
         {/* Video Section */}
