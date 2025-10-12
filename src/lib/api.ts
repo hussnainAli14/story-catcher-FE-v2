@@ -171,7 +171,7 @@ class StoryCatcherAPI {
   }
 
   // Generate video using VideoGen's Prompt-to-Outline and Outline-to-Video APIs
-  async generateVideoWithVideoGenOutline(sessionId: string, email?: string): Promise<{ success: boolean; video_url?: string; outline?: any; message?: string; error?: string }> {
+  async generateVideoWithVideoGenOutline(sessionId: string, email?: string): Promise<{ success: boolean; video_url?: string; outline?: Record<string, unknown>; message?: string; error?: string }> {
     try {
       const response = await this.makeRequest('/video/generate-with-videogen-outline', 'POST', {
         session_id: sessionId,
