@@ -374,8 +374,8 @@ export const useStoryChat = () => {
         // Use the edited storyboard from the chat
         result = await storyAPI.generateVideoFromStoryboard(storyboardMessage.message, emailToUse || undefined, state.sessionId);
       } else {
-        // Fallback to session storyboard
-        result = await storyAPI.generateVideoFromSession(state.sessionId, emailToUse || undefined);
+        // Use VideoGen's Prompt-to-Outline and Outline-to-Video workflow for perfect matching
+        result = await storyAPI.generateVideoWithVideoGenOutline(state.sessionId, emailToUse || undefined);
       }
       
       if (result.success && result.video_url) {

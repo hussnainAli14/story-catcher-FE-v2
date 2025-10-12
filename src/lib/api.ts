@@ -170,7 +170,21 @@ class StoryCatcherAPI {
     }
   }
 
-  // Generate video from completed session
+  // Generate video using VideoGen's Prompt-to-Outline and Outline-to-Video APIs
+  async generateVideoWithVideoGenOutline(sessionId: string, email?: string): Promise<{ success: boolean; video_url?: string; outline?: any; message?: string; error?: string }> {
+    try {
+      const response = await this.makeRequest('/video/generate-with-videogen-outline', 'POST', {
+        session_id: sessionId,
+        email: email || ''
+      });
+      return response;
+    } catch (error) {
+      console.error('VideoGen outline video generation failed:', error);
+      return { success: false, error: 'Failed to generate video with VideoGen outline' };
+    }
+  }
+
+  // Generate video from completed session (OLD METHOD - keeping for backward compatibility)
   async generateVideoFromSession(sessionId: string, email?: string): Promise<{ success: boolean; video_url?: string; message?: string; error?: string }> {
     try {
       const response = await this.makeRequest('/video/generate-from-session', 'POST', {
