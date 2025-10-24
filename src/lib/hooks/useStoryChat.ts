@@ -191,6 +191,7 @@ export const useStoryChat = () => {
               setState(prev => ({
                 ...prev,
                 videoGenerated: true, // Mark video as generated
+                videoGenerating: false, // Reset video generating state
                 messages: prev.messages.map(msg => 
                   msg.videoUrl === videoUrl 
                     ? { 
@@ -345,8 +346,8 @@ export const useStoryChat = () => {
     const emailToUse = email || state.tempEmail;
     const hasEmail = !!emailToUse;
 
-    // Hide the generate button and disable editing
-    setState(prev => ({ ...prev, showGenerateButton: false, videoGenerating: true }));
+    // Disable editing during generation (but keep button for after)
+    setState(prev => ({ ...prev, videoGenerating: true }));
 
     // Add video generation message
     setState(prev => ({
@@ -407,6 +408,7 @@ export const useStoryChat = () => {
             return {
               ...prev,
               videoGenerated: true, // Mark video as generated
+              videoGenerating: false, // Reset video generating state
               messages: [
                 ...prev.messages.slice(0, messagesToKeep),
                 {
@@ -449,7 +451,8 @@ export const useStoryChat = () => {
         index === messageIndex 
           ? { ...msg, message: newMessage, isEditing: false }
           : msg
-      )
+      ),
+      showGenerateButton: true // Show generate button after editing
     }));
   }, []);
 

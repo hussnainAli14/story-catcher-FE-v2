@@ -32,6 +32,13 @@ export interface StorySession {
   storyboard_generating?: boolean;
   images?: string[];
   video_url?: string;
+  videos?: Array<{
+    video_url: string;
+    api_file_id: string;
+    created_at: string;
+    is_edited: boolean;
+    outline?: Record<string, unknown>;
+  }>;
 }
 
 export interface ApiResponse {

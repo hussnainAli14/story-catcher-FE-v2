@@ -30,7 +30,7 @@ const Chat = ({
                     isError={message.isError}
                     images={message.images}
                     videoUrl={message.videoUrl}
-                    isEditable={message.isEditable && !videoGenerated && !videoGenerating}
+                    isEditable={message.isEditable && !videoGenerating}
                     isEditing={message.isEditing}
                     videoGenerating={videoGenerating}
                     onEdit={(newMessage) => onEditMessage?.(index, newMessage)}
