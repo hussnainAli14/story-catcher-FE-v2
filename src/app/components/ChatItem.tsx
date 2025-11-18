@@ -11,6 +11,7 @@ const ChatItem = ({
     isError, 
     images, 
     videoUrl,
+    videoHistory,
     isEditable,
     isEditing,
     videoGenerating,
@@ -29,6 +30,7 @@ const ChatItem = ({
                 isError={isError} 
                 images={images} 
                 videoUrl={videoUrl}
+                videoHistory={videoHistory}
                 isEditable={isEditable}
                 isEditing={isEditing}
                 videoGenerating={videoGenerating}

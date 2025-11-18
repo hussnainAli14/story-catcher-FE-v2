@@ -27,6 +27,7 @@ export type ChatBoxProps = AvatarProps & {
     isError?: boolean;
     images?: string[];
     videoUrl?: string;
+    videoHistory?: string[]; // Array of all videos generated for this storyboard
     isEditable?: boolean;
     isEditing?: boolean;
     onEdit?: (newMessage: string) => void;

@@ -10,6 +10,7 @@ export interface ChatMessage {
   videoUrl?: string;
   isEditable?: boolean;
   isEditing?: boolean;
+  videoHistory?: (string | undefined)[]; // Track all generated videos for this storyboard
 }
 
 export interface ChatState {
@@ -152,7 +153,7 @@ export const useStoryChat = () => {
     }
   }, [state.sessionId]);
 
-  // Poll video status until completion
+  // Poll video status until completion - Updated to update storyboard message
   const pollVideoStatus = useCallback(async (videoUrl: string, hasEmailForSupabase?: boolean) => {
     if (!videoUrl.startsWith('videogen://')) return;
     
@@ -184,29 +185,37 @@ export const useStoryChat = () => {
                   supabaseSaveSuccess = false;
                 }
               } else if (state.sessionId && !shouldSaveToSupabase) {
-                supabaseSaveSuccess = true; // This is expected behavior
+                supabaseSaveSuccess = true;
               }
               
-              // Update the message with the final video URL
-              setState(prev => ({
-                ...prev,
-                videoGenerated: true, // Mark video as generated
-                videoGenerating: false, // Reset video generating state
-                messages: prev.messages.map(msg => 
-                  msg.videoUrl === videoUrl 
-                    ? { 
-                        type: 'assistant',
-                  message: supabaseSaveSuccess 
-                    ? (shouldSaveToSupabase 
-                        ? 'Your video is ready!' 
-                        : 'Your video is ready! (Saved locally - no email provided for database storage)')
-                    : 'Your video is ready! (Note: Video saved locally but not to our database)',
-                        videoUrl: finalVideoUrl, 
-                        isLoading: false 
-                      }
-                    : msg
-                )
-              }));
+              // Find and update the storyboard message with the final video URL
+              setState(prev => {
+                const storyboardMessageIndex = prev.messages.findIndex(msg => 
+                  msg.type === 'assistant' && 
+                  msg.message.includes('**Storyboard:')
+                );
+                
+                if (storyboardMessageIndex === -1) return prev;
+                
+                const storyboardMessage = prev.messages[storyboardMessageIndex];
+                
+                return {
+                  ...prev,
+                  videoGenerated: true,
+                  videoGenerating: false,
+                  messages: [
+                    ...prev.messages.slice(0, storyboardMessageIndex),
+                    {
+                      ...storyboardMessage,
+                      videoUrl: finalVideoUrl,
+                      videoHistory: storyboardMessage.videoHistory?.filter((url): url is string => !!url).map(url => 
+                        url === videoUrl ? finalVideoUrl : url
+                      ) || [finalVideoUrl]
+                    },
+                    ...prev.messages.slice(storyboardMessageIndex + 1)
+                  ]
+                };
+              });
               return;
             }
           }
@@ -219,12 +228,10 @@ export const useStoryChat = () => {
         }
       } catch (error) {
         console.error('Error checking video status:', error);
-        // Check again in 20 seconds on error
         setTimeout(checkStatus, 20000);
       }
     };
     
-    // Start checking after 5 seconds
     setTimeout(checkStatus, 5000);
   }, [state.sessionId, state.hasEmailForSupabase]);
 
@@ -346,10 +353,10 @@ export const useStoryChat = () => {
     const emailToUse = email || state.tempEmail;
     const hasEmail = !!emailToUse;
 
-    // Disable editing during generation (but keep button for after)
+    // Disable editing during generation
     setState(prev => ({ ...prev, videoGenerating: true }));
 
-    // Add video generation message
+    // Add video generation message (this will be removed once video is ready)
     setState(prev => ({
       ...prev,
       messages: [
@@ -364,11 +371,13 @@ export const useStoryChat = () => {
 
     try {
       // Check if there's an edited storyboard in the messages
-      const storyboardMessage = state.messages.find(msg => 
+      const storyboardMessageIndex = state.messages.findIndex(msg => 
         msg.type === 'assistant' && 
         msg.message.includes('**Storyboard:') && 
         !msg.isLoading
       );
+      
+      const storyboardMessage = storyboardMessageIndex !== -1 ? state.messages[storyboardMessageIndex] : null;
       
       // Check if storyboard was edited
       let result;
@@ -385,40 +394,46 @@ export const useStoryChat = () => {
       if (result.success && result.video_url) {
         // Check if it's a videogen:// URL that needs polling
         if (result.video_url.startsWith('videogen://')) {
-          // Keep the loading message and start polling for video completion
+          // Update the storyboard message to show video generation in progress
           setState(prev => ({
             ...prev,
             messages: [
               ...prev.messages.slice(0, -1), // Remove loading message
+              ...prev.messages.slice(0, storyboardMessageIndex),
               {
-                type: 'assistant',
-                message: 'Your video is generating...',
-                isLoading: true,
-                videoUrl: result.video_url
-              }
+                ...storyboardMessage!,
+                videoUrl: result.video_url,
+                videoHistory: [
+                  result.video_url,
+                  ...(storyboardMessage?.videoHistory?.filter((url): url is string => !!url) || [])
+                ]
+              },
+              ...prev.messages.slice(storyboardMessageIndex + 1, -1) // Exclude loading message
             ]
           }));
           
           // Start polling for video completion
           pollVideoStatus(result.video_url, hasEmail);
         } else {
-          // Direct video URL, show immediately
-          setState(prev => {
-            const messagesToKeep = prev.messages.length - 1; // Remove loading message
-            return {
-              ...prev,
-              videoGenerated: true, // Mark video as generated
-              videoGenerating: false, // Reset video generating state
-              messages: [
-                ...prev.messages.slice(0, messagesToKeep),
-                {
-                  type: 'assistant',
-                  message: 'Your video is ready!',
-                  videoUrl: result.video_url
-                }
-              ]
-            };
-          });
+          // Direct video URL, update storyboard message immediately
+          setState(prev => ({
+            ...prev,
+            videoGenerated: true,
+            videoGenerating: false,
+            messages: [
+              ...prev.messages.slice(0, -1), // Remove loading message
+              ...prev.messages.slice(0, storyboardMessageIndex),
+              {
+                ...storyboardMessage!,
+                videoUrl: result.video_url,
+                videoHistory: [
+                  result.video_url,
+                  ...(storyboardMessage?.videoHistory || [])
+                ]
+              },
+              ...prev.messages.slice(storyboardMessageIndex + 1, -1) // Exclude loading message
+            ]
+          }));
         }
       } else {
         throw new Error(result.error || 'Video generation failed');
@@ -428,8 +443,8 @@ export const useStoryChat = () => {
         const messagesToKeep = prev.messages.length - 1; // Remove loading message
         return {
           ...prev,
-          showGenerateButton: true, // Show button again on error
-          videoGenerating: false, // Reset video generating state on error
+          showGenerateButton: true,
+          videoGenerating: false,
           messages: [
             ...prev.messages.slice(0, messagesToKeep),
             {

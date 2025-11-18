@@ -5,12 +5,24 @@ interface StoryboardProps {
   content: string;
   images?: string[];
   videoUrl?: string;
+  videoHistory?: string[]; // All videos for this storyboard
   videoGenerating?: boolean;
 }
 
-const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl, videoGenerating = false }) => {
+const Storyboard: React.FC<StoryboardProps> = ({ 
+  content, 
+  images = [], 
+  videoUrl, 
+  videoHistory = [], 
+  videoGenerating = false 
+}) => {
   const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
   const [showDownloadInstructions, setShowDownloadInstructions] = useState(false);
+
+  // Update current video URL when prop changes
+  useEffect(() => {
+    setCurrentVideoUrl(videoUrl);
+  }, [videoUrl]);
 
   // Function to download video
   const downloadVideo = async (url: string) => {
@@ -85,6 +97,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
     // Start checking after 5 seconds
     setTimeout(checkStatus, 5000);
   };
+
   // Parse the storyboard content and format it simply
   const formatStoryboard = (text: string) => {
     // If no content but we have a video, just show the video
@@ -224,7 +237,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
           }`}>
             {videoGenerating 
               ? 'Editing is disabled while your video is being generated. You can edit after the video is complete or start a new story.'
-              : 'Click the edit button (✏️) that appears when you hover over the storyboard to make changes before generating your video.'
+              : 'Click the edit button (✏️) that appears when you hover over the storyboard to make changes and generate new videos.'
             }
           </p>
         </div>
@@ -250,12 +263,19 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
           ))}
         </div>
 
-        {/* Video Section */}
+        {/* Latest Video Section - Always appears right after storyboard */}
         {currentVideoUrl && (
-          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-bold text-black mb-3">
-              🎬 Your Generated Video
-            </h3>
+          <div className="mt-6 p-4 bg-green-50 rounded-lg border-2 border-green-200">
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="text-lg font-bold text-black">
+                🎬 Latest Video
+              </h3>
+              {videoHistory.length > 1 && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                  {videoHistory.length} videos generated
+                </span>
+              )}
+            </div>
             <div className="space-y-3">
               {currentVideoUrl.startsWith('videogen://') ? (
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -264,11 +284,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                     <span className="text-blue-800 font-medium">Video is being generated...</span>
                   </div>
                   <p className="text-sm text-blue-600 mt-2">
-                    Your video is currently being processed. This usually takes 2-5 minutes. 
-                    The video will appear here once it&apos;s ready.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Video ID: {currentVideoUrl.replace('videogen://', '')}
+                    Your latest video is currently being processed. This usually takes 2-5 minutes.
                   </p>
                 </div>
               ) : (
@@ -276,7 +292,7 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                   <video 
                     controls 
                     className="w-full max-w-md mx-auto rounded-lg shadow-sm"
-                    poster={images[0]} // Use first image as poster
+                    poster={images[0]}
                   >
                     <source src={currentVideoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
@@ -286,16 +302,37 @@ const Storyboard: React.FC<StoryboardProps> = ({ content, images = [], videoUrl,
                       onClick={() => downloadVideo(currentVideoUrl)}
                       className="px-4 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono text-sm flex items-center gap-2 mx-auto"
                     >
-                      📥 Download Video
+                      📥 Download Latest Video
                     </button>
-                    {showDownloadInstructions && (
-                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-                        💡 If download doesn&apos;t start automatically, right-click on the video above and select &quot;Save video as...&quot;
-                      </div>
-                    )}
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Previous Videos Section - Only show if there are older videos */}
+        {videoHistory && videoHistory.length > 1 && (
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">
+              📼 Previous Videos ({videoHistory.length - 1})
+            </h4>
+            <div className="space-y-2">
+              {videoHistory.slice(1).map((historyVideoUrl, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
+                  <span className="text-gray-600">
+                    Video #{videoHistory.length - index - 1}
+                  </span>
+                  {!historyVideoUrl.startsWith('videogen://') && (
+                    <button
+                      onClick={() => downloadVideo(historyVideoUrl)}
+                      className="text-xs px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                    >
+                      📥 Download
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}

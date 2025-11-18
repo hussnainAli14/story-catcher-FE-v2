@@ -9,6 +9,7 @@ const ChatBox = ({
     isError, 
     images,
     videoUrl, 
+    videoHistory,
     isEditable = false,
     isEditing = false,
     onEdit,
@@ -95,17 +96,23 @@ const ChatBox = ({
                     </div>
                 </div>
             ) : isStoryboard ? (
-                <div className="w-full relative">
-                    <Storyboard content={message} images={images} videoUrl={videoUrl} videoGenerating={videoGenerating} />
-                    {isEditable && (
+                <div className="w-full relative group">
+                    <Storyboard 
+                        content={message} 
+                        images={images} 
+                        videoUrl={videoUrl} 
+                        videoHistory={videoHistory}
+                        videoGenerating={videoGenerating} 
+                    />
+                    {isEditable && !videoGenerating && (
                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onStartEdit?.();
                                 }}
-                                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-lg"
-                                title="Edit storyboard - Click to modify your story before generating video"
+                                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-lg text-sm"
+                                title="Edit storyboard - Make changes and generate a new video"
                             >
                                 ✏️ Edit
                             </button>
@@ -114,10 +121,13 @@ const ChatBox = ({
                 </div>
             ) : videoUrl ? (
                 <div className="w-full">
-                    <div className="mb-3">
-                        {message}
-                    </div>
-                    <Storyboard content="" images={images} videoUrl={videoUrl} />
+                    <div className="mb-3">{message}</div>
+                    <Storyboard 
+                        content="" 
+                        images={images} 
+                        videoUrl={videoUrl} 
+                        videoHistory={videoHistory}
+                    />
                 </div>
             ) : (
                 <div className="relative">
