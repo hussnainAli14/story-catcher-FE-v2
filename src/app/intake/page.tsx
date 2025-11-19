@@ -173,10 +173,11 @@ const Intake = () => {
                                 </p>
                             </div>
                             
-                            {showGenerateButton && (
+                            {showGenerateButton && !videoGenerating && (
                                 <button
                                     onClick={handleGenerateVideo}
-                                    className="px-6 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono"
+                                    disabled={videoGenerating}
+                                    className="px-6 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Generate Video
                                 </button>
