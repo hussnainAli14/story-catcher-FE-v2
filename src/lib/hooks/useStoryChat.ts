@@ -10,6 +10,7 @@ export interface ChatMessage {
   videoUrl?: string;
   isEditable?: boolean;
   isEditing?: boolean;
+  shouldScrollTo?: boolean; // Flag to trigger scroll when video is ready
 }
 
 export interface ChatState {
@@ -224,7 +225,8 @@ export const useStoryChat = () => {
                         : 'Your video is ready! (Saved locally - no email provided for database storage)')
                     : 'Your video is ready! (Note: Video saved locally but not to our database)',
                   videoUrl: finalVideoUrl,
-                  isLoading: false
+                  isLoading: false,
+                  shouldScrollTo: true // Flag to trigger auto-scroll
                 };
                 
                 // Insert video message at correct position
@@ -419,41 +421,29 @@ export const useStoryChat = () => {
       if (result.success && result.video_url) {
         // Check if it's a videogen:// URL that needs polling
         if (result.video_url.startsWith('videogen://')) {
-          // Update the loading message with video URL and move to correct position
+          // Update the loading message at the end with video URL (keep it at end during generation)
           setState(prev => {
-            // Remove the initial loading message
-            const messagesWithoutLoading = prev.messages.filter((msg, idx) => 
-              !(idx === prev.messages.length - 1 && msg.isLoading && !msg.videoUrl)
+            // Update the last loading message with video URL
+            const updatedMessages = prev.messages.map((msg, idx) => 
+              idx === prev.messages.length - 1 && msg.isLoading && !msg.videoUrl
+                ? {
+                    ...msg,
+                    videoUrl: result.video_url,
+                    message: 'Your video is generating...'
+                  }
+                : msg
             );
-            
-            // Find insertion point (right after storyboard)
-            const insertIndex = findVideoInsertionIndex(messagesWithoutLoading);
-            
-            // Create loading video message
-            const loadingVideoMessage: ChatMessage = {
-              type: 'assistant',
-              message: 'Your video is generating...',
-              isLoading: true,
-              videoUrl: result.video_url
-            };
-            
-            // Insert loading video message at correct position
-            const newMessages = [
-              ...messagesWithoutLoading.slice(0, insertIndex),
-              loadingVideoMessage,
-              ...messagesWithoutLoading.slice(insertIndex)
-            ];
             
             return {
               ...prev,
-              messages: newMessages
+              messages: updatedMessages
             };
           });
           
           // Start polling for video completion
           pollVideoStatus(result.video_url, hasEmail);
         } else {
-          // Direct video URL, show immediately at correct position
+          // Direct video URL, show immediately at correct position (below storyboard)
           setState(prev => {
             // Remove the initial loading message
             const messagesWithoutLoading = prev.messages.filter((msg, idx) => 
@@ -467,7 +457,8 @@ export const useStoryChat = () => {
             const completedVideoMessage: ChatMessage = {
               type: 'assistant',
               message: 'Your video is ready!',
-              videoUrl: result.video_url
+              videoUrl: result.video_url,
+              shouldScrollTo: true // Flag to trigger auto-scroll
             };
             
             // Insert completed video message at correct position

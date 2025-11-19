@@ -34,6 +34,7 @@ export type ChatBoxProps = AvatarProps & {
     onStartEdit?: () => void;
     onCancelEdit?: () => void;
     videoGenerating?: boolean;
+    shouldScrollTo?: boolean; // Flag to trigger scroll when video is ready
 }
 
 export type ChatProps = {
