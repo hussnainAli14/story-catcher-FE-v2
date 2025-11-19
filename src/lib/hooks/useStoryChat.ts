@@ -208,7 +208,36 @@ export const useStoryChat = () => {
               
               // Remove the loading message and insert completed video at correct position
               setState(prev => {
-                // Remove the loading message
+                // Check if this video already exists (avoid duplicates)
+                const videoAlreadyExists = prev.messages.some(msg => 
+                  msg.videoUrl === finalVideoUrl && !msg.isLoading
+                );
+                
+                if (videoAlreadyExists) {
+                  // Video already exists, just update the loading state
+                  console.log('Video already exists, skipping duplicate insertion');
+                  return {
+                    ...prev,
+                    videoGenerated: true,
+                    videoGenerating: false,
+                    messages: prev.messages.map(msg => 
+                      msg.videoUrl === videoUrl && msg.isLoading
+                        ? {
+                            ...msg,
+                            videoUrl: finalVideoUrl,
+                            isLoading: false,
+                            message: supabaseSaveSuccess 
+                              ? (shouldSaveToSupabase 
+                                  ? 'Your video is ready!' 
+                                  : 'Your video is ready! (Saved locally - no email provided for database storage)')
+                              : 'Your video is ready! (Note: Video saved locally but not to our database)'
+                          }
+                        : msg
+                    )
+                  };
+                }
+                
+                // Remove the loading message (find the one with matching videogen URL)
                 const messagesWithoutLoading = prev.messages.filter(msg => 
                   !(msg.videoUrl === videoUrl && msg.isLoading)
                 );
@@ -423,9 +452,34 @@ export const useStoryChat = () => {
         if (result.video_url.startsWith('videogen://')) {
           // Update the loading message at the end with video URL (keep it at end during generation)
           setState(prev => {
-            // Update the last loading message with video URL
+            // Find the last loading message without a videoUrl (the one we just added)
+            let foundLoadingIndex = -1;
+            for (let i = prev.messages.length - 1; i >= 0; i--) {
+              if (prev.messages[i].isLoading && !prev.messages[i].videoUrl) {
+                foundLoadingIndex = i;
+                break;
+              }
+            }
+            
+            if (foundLoadingIndex === -1) {
+              // No loading message found, add one
+              return {
+                ...prev,
+                messages: [
+                  ...prev.messages,
+                  {
+                    type: 'assistant',
+                    message: 'Your video is generating...',
+                    isLoading: true,
+                    videoUrl: result.video_url
+                  }
+                ]
+              };
+            }
+            
+            // Update the found loading message with video URL
             const updatedMessages = prev.messages.map((msg, idx) => 
-              idx === prev.messages.length - 1 && msg.isLoading && !msg.videoUrl
+              idx === foundLoadingIndex
                 ? {
                     ...msg,
                     videoUrl: result.video_url,
