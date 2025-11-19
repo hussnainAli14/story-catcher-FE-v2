@@ -8,7 +8,6 @@ export interface ChatMessage {
   isError?: boolean;
   images?: string[];
   videoUrl?: string;
-  videoHistory?: string[];
   isEditable?: boolean;
   isEditing?: boolean;
   shouldScrollTo?: boolean; // Flag to trigger scroll when video is ready
@@ -34,17 +33,17 @@ const SESSION_STORAGE_KEY = 'story-catcher-session';
 // Helper function to find insertion point for video messages (right after storyboard)
 const findVideoInsertionIndex = (messages: ChatMessage[]): number => {
   // Find storyboard message index
-  const storyboardIndex = messages.findIndex(msg => 
-    msg.type === 'assistant' && 
-    msg.message.includes('**Storyboard:') && 
+  const storyboardIndex = messages.findIndex(msg =>
+    msg.type === 'assistant' &&
+    msg.message.includes('**Storyboard:') &&
     !msg.isLoading
   );
-  
+
   if (storyboardIndex === -1) {
     // No storyboard found, append to end
     return messages.length;
   }
-  
+
   // Insert right after storyboard (newest videos appear first)
   return storyboardIndex + 1;
 };
@@ -114,7 +113,7 @@ export const useStoryChat = () => {
       }
 
       const session: StorySession = await storyAPI.startSession();
-      
+
       setState(prev => ({
         ...prev,
         sessionId: session.session_id,
@@ -147,19 +146,19 @@ export const useStoryChat = () => {
 
     try {
       const result = await storyAPI.checkStoryboardStatus(state.sessionId);
-      
+
       if (result.success && result.status === 'completed' && result.storyboard) {
         // Replace the loading message with the completed storyboard
         setState(prev => ({
           ...prev,
           showGenerateButton: true, // Show generate button when storyboard is complete
-          messages: prev.messages.map((msg, index) => 
+          messages: prev.messages.map((msg, index) =>
             index === prev.messages.length - 1 && msg.isLoading
-              ? { 
-                  type: 'assistant', 
-                  message: result.storyboard!,
-                  isEditable: true
-                }
+              ? {
+                type: 'assistant',
+                message: result.storyboard!,
+                isEditable: true
+              }
               : msg
           )
         }));
@@ -172,26 +171,26 @@ export const useStoryChat = () => {
     }
   }, [state.sessionId]);
 
-  // Poll video status until completion - Updated to update storyboard message
+  // Poll video status until completion
   const pollVideoStatus = useCallback(async (videoUrl: string, hasEmailForSupabase?: boolean) => {
     if (!videoUrl.startsWith('videogen://')) return;
-    
+
     const apiFileId = videoUrl.replace('videogen://', '');
-    
+
     const checkStatus = async () => {
       try {
         const result = await storyAPI.checkVideoStatus(apiFileId);
-        
+
         if (result.success && result.result) {
           const loadingState = result.result.loadingState;
-          
+
           if (loadingState === 'FULFILLED') {
             const finalVideoUrl = result.result.apiFileSignedUrl;
             if (finalVideoUrl) {
               // Save final video URL to Supabase if session exists AND email was provided
               let supabaseSaveSuccess = true;
               const shouldSaveToSupabase = hasEmailForSupabase !== undefined ? hasEmailForSupabase : state.hasEmailForSupabase;
-              
+
               if (state.sessionId && shouldSaveToSupabase) {
                 try {
                   const saveResult = await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
@@ -203,46 +202,37 @@ export const useStoryChat = () => {
                   console.error('Failed to save video to Supabase:', error);
                   supabaseSaveSuccess = false;
                 }
+              } else if (state.sessionId && !shouldSaveToSupabase) {
+                supabaseSaveSuccess = true;
               }
-              
-              // Update the storyboard message with the completed video
+
+              // Update the loading message with the completed video
               setState(prev => {
-                // Find storyboard message
-                const storyboardIndex = prev.messages.findIndex(msg => 
-                  msg.type === 'assistant' && 
-                  msg.message.includes('**Storyboard:')
-                );
-
-                if (storyboardIndex === -1) return prev;
-
-                const updatedMessages = [...prev.messages];
-                const storyboardMsg = updatedMessages[storyboardIndex];
-
-                // Update videoUrl and videoHistory
-                // Replace the temp URL in history with final URL
-                const currentHistory = storyboardMsg.videoHistory || [];
-                const updatedHistory = currentHistory.map(url => 
-                  url === videoUrl ? finalVideoUrl : url
-                );
-
-                updatedMessages[storyboardIndex] = {
-                  ...storyboardMsg,
-                  videoUrl: finalVideoUrl,
-                  videoHistory: updatedHistory,
-                  shouldScrollTo: true
-                };
-                
                 return {
                   ...prev,
-                  videoGenerated: true, // Mark video as generated
-                  videoGenerating: false, // Reset video generating state
-                  messages: updatedMessages
+                  videoGenerated: true,
+                  videoGenerating: false,
+                  messages: prev.messages.map(msg =>
+                    msg.videoUrl === videoUrl
+                      ? {
+                        ...msg,
+                        videoUrl: finalVideoUrl,
+                        isLoading: false,
+                        shouldScrollTo: true,
+                        message: supabaseSaveSuccess
+                          ? (shouldSaveToSupabase
+                            ? 'Your video is ready!'
+                            : 'Your video is ready! (Saved locally - no email provided for database storage)')
+                          : 'Your video is ready! (Note: Video saved locally but not to our database)'
+                      }
+                      : msg
+                  )
                 };
               });
               return;
             }
           }
-          
+
           // Still processing, check again in 10 seconds
           setTimeout(checkStatus, 10000);
         } else {
@@ -254,7 +244,7 @@ export const useStoryChat = () => {
         setTimeout(checkStatus, 20000);
       }
     };
-    
+
     setTimeout(checkStatus, 5000);
   }, [state.sessionId, state.hasEmailForSupabase]);
 
@@ -263,12 +253,12 @@ export const useStoryChat = () => {
     if (!state.sessionId || state.isComplete) return;
 
     // Add user message and loading indicator
-    setState(prev => ({ 
-      ...prev, 
-      isLoading: true, 
+    setState(prev => ({
+      ...prev,
+      isLoading: true,
       error: null,
       messages: [
-        ...prev.messages, 
+        ...prev.messages,
         { type: 'user', message: answer },
         // Show loading message if this is the 4th question (storyboard generation)
         ...(state.currentQuestion === 4 ? [{
@@ -281,7 +271,7 @@ export const useStoryChat = () => {
 
     try {
       const session: StorySession = await storyAPI.submitAnswer(
-        state.sessionId, 
+        state.sessionId,
         answer
       );
 
@@ -293,22 +283,22 @@ export const useStoryChat = () => {
       if (session.session_complete) {
         if (session.storyboard_generating) {
           // Storyboard is still generating, add polling message
-          newMessages.push({ 
-            type: 'assistant', 
+          newMessages.push({
+            type: 'assistant',
             message: 'Generating your storyboard...',
             isLoading: true
           });
         } else if (session.storyboard) {
-        newMessages.push({ 
-          type: 'assistant', 
-          message: session.storyboard,
+          newMessages.push({
+            type: 'assistant',
+            message: session.storyboard,
             isEditable: true
-        });
+          });
         }
       } else if (session.question) {
         // Add the next question
-        newMessages.push({ 
-          type: 'assistant', 
+        newMessages.push({
+          type: 'assistant',
           message: session.question
         });
       }
@@ -316,7 +306,7 @@ export const useStoryChat = () => {
       setState(prev => {
         // Calculate how many messages to keep (remove loading message if it exists)
         const messagesToKeep = state.currentQuestion === 4 ? prev.messages.length - 1 : prev.messages.length;
-        
+
         const newState = {
           ...prev,
           currentQuestion: session.question_number || prev.currentQuestion + 1,
@@ -344,7 +334,7 @@ export const useStoryChat = () => {
       setState(prev => {
         // Calculate how many messages to keep (remove loading message if it exists)
         const messagesToKeep = state.currentQuestion === 4 ? prev.messages.length - 1 : prev.messages.length;
-        
+
         return {
           ...prev,
           isLoading: false,
@@ -361,8 +351,8 @@ export const useStoryChat = () => {
 
   // Store email temporarily (from popup)
   const storeEmail = useCallback((email?: string) => {
-    setState(prev => ({ 
-      ...prev, 
+    setState(prev => ({
+      ...prev,
       tempEmail: email || null,
       hasEmailForSupabase: !!email // Track if email was provided
     }));
@@ -377,21 +367,34 @@ export const useStoryChat = () => {
     const hasEmail = !!emailToUse;
 
     // Find storyboard message index
-    const storyboardIndex = state.messages.findIndex(msg => 
-      msg.type === 'assistant' && 
-      msg.message.includes('**Storyboard:') && 
+    const storyboardIndex = state.messages.findIndex(msg =>
+      msg.type === 'assistant' &&
+      msg.message.includes('**Storyboard:') &&
       !msg.isLoading
     );
-    
+
     if (storyboardIndex === -1) return;
     const storyboardMsg = state.messages[storyboardIndex];
     const storyboardMessageText = storyboardMsg.message;
 
     // Disable editing during generation
-    setState(prev => ({ 
-      ...prev, 
-      videoGenerating: true
-    }));
+    setState(prev => {
+      // Insert loading message immediately after storyboard
+      const newMessages = [...prev.messages];
+      const loadingMessage: ChatMessage = {
+        type: 'assistant',
+        message: 'Your video is generating...',
+        isLoading: true
+      };
+
+      newMessages.splice(storyboardIndex + 1, 0, loadingMessage);
+
+      return {
+        ...prev,
+        videoGenerating: true,
+        messages: newMessages
+      };
+    });
 
     try {
       // Check if storyboard was edited and use the latest text
@@ -405,50 +408,72 @@ export const useStoryChat = () => {
         console.log('Using original outline for video generation');
         result = await storyAPI.generateVideoWithVideoGenOutline(state.sessionId, emailToUse || undefined);
       }
-      
+
       if (result.success && result.video_url) {
-        // Update the storyboard message with the new video URL
+        // Update the loading message with the video URL (for polling)
         setState(prev => {
-          const updatedMessages = [...prev.messages];
-          const msg = updatedMessages[storyboardIndex];
-          
-          // Add new URL to history (at start)
-          const newHistory = [result.video_url!, ...(msg.videoHistory || [])];
-          
-          updatedMessages[storyboardIndex] = {
-            ...msg,
-            videoUrl: result.video_url,
-            videoHistory: newHistory
-          };
-          
+          const updatedMessages = prev.messages.map((msg, idx) => {
+            // We assume the loading message is still at storyboardIndex + 1
+            // But to be safe, we look for the loading message we just added
+            if (idx === storyboardIndex + 1 && msg.isLoading && !msg.videoUrl) {
+              return {
+                ...msg,
+                videoUrl: result.video_url
+              };
+            }
+            return msg;
+          });
+
           return {
             ...prev,
             messages: updatedMessages
           };
         });
-        
+
         // Check if it's a videogen:// URL that needs polling
         if (result.video_url.startsWith('videogen://')) {
           // Start polling for video completion
           pollVideoStatus(result.video_url, hasEmail);
         } else {
-          // Direct video URL, mark as generated
+          // Direct video URL, mark as generated and update message
           setState(prev => ({
             ...prev,
             videoGenerated: true,
-            videoGenerating: false
+            videoGenerating: false,
+            messages: prev.messages.map((msg, idx) =>
+              idx === storyboardIndex + 1
+                ? {
+                  ...msg,
+                  message: 'Your video is ready!',
+                  isLoading: false,
+                  shouldScrollTo: true
+                }
+                : msg
+            )
           }));
         }
       } else {
         throw new Error(result.error || 'Video generation failed');
       }
     } catch {
-      setState(prev => ({
-        ...prev,
-        showGenerateButton: true,
-        videoGenerating: false,
-        error: 'Video generation failed. Please try again.'
-      }));
+      setState(prev => {
+        // Remove the loading message on error
+        const newMessages = prev.messages.filter((_, idx) => idx !== storyboardIndex + 1);
+
+        return {
+          ...prev,
+          showGenerateButton: true,
+          videoGenerating: false,
+          messages: [
+            ...newMessages,
+            {
+              type: 'assistant',
+              message: 'Sorry, video generation failed. Please try again.',
+              isError: true
+            }
+          ]
+        };
+      });
     }
   }, [state.sessionId, state.messages, state.tempEmail, pollVideoStatus]);
 
@@ -456,8 +481,8 @@ export const useStoryChat = () => {
   const editMessage = useCallback((messageIndex: number, newMessage: string) => {
     setState(prev => ({
       ...prev,
-      messages: prev.messages.map((msg, index) => 
-        index === messageIndex 
+      messages: prev.messages.map((msg, index) =>
+        index === messageIndex
           ? { ...msg, message: newMessage, isEditing: false }
           : msg
       ),
@@ -469,8 +494,8 @@ export const useStoryChat = () => {
   const startEditing = useCallback((messageIndex: number) => {
     setState(prev => ({
       ...prev,
-      messages: prev.messages.map((msg, index) => 
-        index === messageIndex 
+      messages: prev.messages.map((msg, index) =>
+        index === messageIndex
           ? { ...msg, isEditing: true }
           : { ...msg, isEditing: false }
       )
@@ -481,8 +506,8 @@ export const useStoryChat = () => {
   const cancelEditing = useCallback((messageIndex: number) => {
     setState(prev => ({
       ...prev,
-      messages: prev.messages.map((msg, index) => 
-        index === messageIndex 
+      messages: prev.messages.map((msg, index) =>
+        index === messageIndex
           ? { ...msg, isEditing: false }
           : msg
       )
