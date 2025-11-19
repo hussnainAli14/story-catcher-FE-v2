@@ -380,12 +380,20 @@ export const useStoryChat = () => {
     const emailToUse = email || state.tempEmail;
     const hasEmail = !!emailToUse;
 
-    // Disable editing during generation
-    setState(prev => ({ ...prev, videoGenerating: true }));
+    // Get the latest storyboard message BEFORE updating state
+    const storyboardMsg = state.messages.find(msg => 
+      msg.type === 'assistant' && 
+      msg.message.includes('**Storyboard:') && 
+      !msg.isLoading
+    );
+    
+    const storyboardMessageText = storyboardMsg?.message || null;
 
-    // Add video generation message at the end (will be moved to correct position when video completes)
-    setState(prev => ({
-      ...prev,
+    // Disable editing during generation
+    setState(prev => ({ 
+      ...prev, 
+      videoGenerating: true,
+      // Add video generation message at the end
       messages: [
         ...prev.messages,
         {
@@ -397,21 +405,13 @@ export const useStoryChat = () => {
     }));
 
     try {
-      // Check if there's an edited storyboard in the messages
-      const storyboardMessageIndex = state.messages.findIndex(msg => 
-        msg.type === 'assistant' && 
-        msg.message.includes('**Storyboard:') && 
-        !msg.isLoading
-      );
-      
-      const storyboardMessage = storyboardMessageIndex !== -1 ? state.messages[storyboardMessageIndex] : null;
-      
-      // Check if storyboard was edited
+      // Check if storyboard was edited and use the latest text
       let result;
-      if (storyboardMessage) {
+      if (storyboardMessageText) {
         // User edited the storyboard - use the edited text
         console.log('Using edited storyboard for video generation');
-        result = await storyAPI.generateVideoFromEditedStoryboard(storyboardMessage.message, state.sessionId, emailToUse || undefined);
+        console.log('Storyboard text length:', storyboardMessageText.length);
+        result = await storyAPI.generateVideoFromEditedStoryboard(storyboardMessageText, state.sessionId, emailToUse || undefined);
       } else {
         // No edits - use the original VideoGen outline
         console.log('Using original outline for video generation');
