@@ -9,12 +9,12 @@ interface StoryboardProps {
   videoGenerating?: boolean;
 }
 
-const Storyboard: React.FC<StoryboardProps> = ({ 
-  content, 
-  images = [], 
-  videoUrl, 
-  videoHistory = [], 
-  videoGenerating = false 
+const Storyboard: React.FC<StoryboardProps> = ({
+  content,
+  images = [],
+  videoUrl,
+  videoHistory = [],
+  videoGenerating = false
 }) => {
   const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
   const [showDownloadInstructions, setShowDownloadInstructions] = useState(false);
@@ -32,22 +32,22 @@ const Storyboard: React.FC<StoryboardProps> = ({
       if (!response.ok) {
         throw new Error('Failed to fetch video');
       }
-      
+
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = `story-video-${Date.now()}.mp4`;
       link.style.display = 'none';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the object URL
       window.URL.revokeObjectURL(downloadUrl);
-      
+
     } catch (error) {
       console.error('Error downloading video:', error);
       // Fallback: show user instructions
@@ -65,14 +65,14 @@ const Storyboard: React.FC<StoryboardProps> = ({
   }, [videoUrl]);
 
   const checkVideoStatus = async (apiFileId: string) => {
-    
+
     const checkStatus = async () => {
       try {
         const result = await storyAPI.checkVideoStatus(apiFileId);
-        
+
         if (result.success && result.result) {
           const loadingState = result.result.loadingState;
-          
+
           if (loadingState === 'FULFILLED') {
             const videoUrl = result.result.apiFileSignedUrl;
             if (videoUrl) {
@@ -80,7 +80,7 @@ const Storyboard: React.FC<StoryboardProps> = ({
               return;
             }
           }
-          
+
           // Still processing, check again in 10 seconds
           setTimeout(checkStatus, 10000);
         } else {
@@ -93,7 +93,7 @@ const Storyboard: React.FC<StoryboardProps> = ({
         setTimeout(checkStatus, 20000);
       }
     };
-    
+
     // Start checking after 5 seconds
     setTimeout(checkStatus, 5000);
   };
@@ -117,7 +117,7 @@ const Storyboard: React.FC<StoryboardProps> = ({
                     <span className="text-blue-800 font-medium">Video is being generated...</span>
                   </div>
                   <p className="text-sm text-blue-600 mt-2">
-                    Your video is currently being processed. This usually takes 2-5 minutes. 
+                    Your video is currently being processed. This usually takes 2-5 minutes.
                     The video will appear here once it&apos;s ready.
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
@@ -126,8 +126,8 @@ const Storyboard: React.FC<StoryboardProps> = ({
                 </div>
               ) : (
                 <>
-                  <video 
-                    controls 
+                  <video
+                    controls
                     className="w-full max-w-md mx-auto rounded-lg shadow-sm"
                     poster={images[0]} // Use first image as poster
                   >
@@ -154,19 +154,19 @@ const Storyboard: React.FC<StoryboardProps> = ({
         </div>
       );
     }
-    
+
     // Parse the new storyboard format
     const lines = text.split('\n');
     let title = 'Your Story Outline';
     let subtitle = '';
     const sceneContent: { number: number; text: string }[] = [];
-    
+
     let currentScene = 0;
     let currentText: string[] = [];
-    
+
     for (const line of lines) {
       const trimmedLine = line.trim();
-      
+
       // Extract title
       if (trimmedLine.startsWith('**Storyboard:')) {
         title = trimmedLine.replace(/\*\*Storyboard:\s*/, '').replace(/\*\*/g, '');
@@ -193,12 +193,12 @@ const Storyboard: React.FC<StoryboardProps> = ({
         currentText.push(trimmedLine);
       }
     }
-    
+
     // Add last scene
     if (currentScene > 0 && currentText.length > 0) {
       sceneContent.push({ number: currentScene, text: currentText.join(' ').trim() });
     }
-    
+
     // If no scenes found, return simple text rendering
     if (sceneContent.length === 0) {
       return <div className="storyboard-container whitespace-pre-wrap">{text}</div>;
@@ -217,25 +217,22 @@ const Storyboard: React.FC<StoryboardProps> = ({
         </div>
 
         {/* Editing Instructions */}
-        <div className={`mb-4 p-3 border rounded-lg ${
-          videoGenerating 
-            ? 'bg-orange-50 border-orange-200' 
+        <div className={`mb-4 p-3 border rounded-lg ${videoGenerating
+            ? 'bg-orange-50 border-orange-200'
             : 'bg-blue-50 border-blue-200'
-        }`}>
+          }`}>
           <div className="flex items-center gap-2 mb-2">
             <span className={videoGenerating ? 'text-orange-600' : 'text-blue-600'}>
               {videoGenerating ? '⏳' : '✏️'}
             </span>
-            <h3 className={`text-sm font-semibold ${
-              videoGenerating ? 'text-orange-800' : 'text-blue-800'
-            }`}>
+            <h3 className={`text-sm font-semibold ${videoGenerating ? 'text-orange-800' : 'text-blue-800'
+              }`}>
               {videoGenerating ? 'Video Generation in Progress' : 'You can edit your storyboard!'}
             </h3>
           </div>
-          <p className={`text-xs ${
-            videoGenerating ? 'text-orange-700' : 'text-blue-700'
-          }`}>
-            {videoGenerating 
+          <p className={`text-xs ${videoGenerating ? 'text-orange-700' : 'text-blue-700'
+            }`}>
+            {videoGenerating
               ? 'Editing is disabled while your video is being generated. You can edit after the video is complete or start a new story.'
               : 'Click the edit button (✏️) that appears when you hover over the storyboard to make changes and generate new videos.'
             }
@@ -289,8 +286,9 @@ const Storyboard: React.FC<StoryboardProps> = ({
                 </div>
               ) : (
                 <>
-                  <video 
-                    controls 
+                  <video
+                    key={currentVideoUrl}
+                    controls
                     className="w-full max-w-md mx-auto rounded-lg shadow-sm"
                     poster={images[0]}
                   >
