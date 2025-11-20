@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { storyAPI, StorySession } from '../api';
 
 export interface ChatMessage {
+  id: string;
   type: 'user' | 'assistant';
   message: string;
   isLoading?: boolean;
@@ -120,8 +121,8 @@ export const useStoryChat = () => {
         currentQuestion: session.question_number || 1,
         totalQuestions: session.total_questions || 4,
         messages: [
-          { type: 'assistant', message: session.message },
-          { type: 'assistant', message: session.question || '' }
+          { id: crypto.randomUUID(), type: 'assistant', message: session.message },
+          { id: crypto.randomUUID(), type: 'assistant', message: session.question || '' }
         ],
         isLoading: false,
         error: null,
@@ -134,7 +135,7 @@ export const useStoryChat = () => {
         error: errorMessage,
         messages: [
           ...prev.messages,
-          { type: 'assistant', message: 'Sorry, I encountered an error. Please try again.', isError: true }
+          { id: crypto.randomUUID(), type: 'assistant', message: 'Sorry, I encountered an error. Please try again.', isError: true }
         ]
       }));
     }
@@ -155,7 +156,7 @@ export const useStoryChat = () => {
           messages: prev.messages.map((msg, index) =>
             index === prev.messages.length - 1 && msg.isLoading
               ? {
-                type: 'assistant',
+                ...msg,
                 message: result.storyboard!,
                 isEditable: true
               }
@@ -213,11 +214,13 @@ export const useStoryChat = () => {
                   !(msg.videoUrl === videoUrl && msg.isLoading)
                 );
 
+
                 // Find insertion point (right after storyboard)
                 const insertIndex = findVideoInsertionIndex(messagesWithoutLoading);
 
                 // Create the completed video message
                 const completedVideoMessage: ChatMessage = {
+                  id: crypto.randomUUID(),
                   type: 'assistant',
                   message: supabaseSaveSuccess
                     ? (shouldSaveToSupabase
@@ -273,9 +276,10 @@ export const useStoryChat = () => {
       error: null,
       messages: [
         ...prev.messages,
-        { type: 'user', message: answer },
+        { id: crypto.randomUUID(), type: 'user', message: answer },
         // Show loading message if this is the 4th question (storyboard generation)
         ...(state.currentQuestion === 4 ? [{
+          id: crypto.randomUUID(),
           type: 'assistant' as const,
           message: 'Generating your storyboard...',
           isLoading: true
@@ -290,7 +294,7 @@ export const useStoryChat = () => {
       );
 
       const newMessages: ChatMessage[] = [
-        { type: 'assistant', message: session.message }
+        { id: crypto.randomUUID(), type: 'assistant', message: session.message }
       ];
 
       // If session is complete, add the storyboard (no video yet)
@@ -298,12 +302,14 @@ export const useStoryChat = () => {
         if (session.storyboard_generating) {
           // Storyboard is still generating, add polling message
           newMessages.push({
+            id: crypto.randomUUID(),
             type: 'assistant',
             message: 'Generating your storyboard...',
             isLoading: true
           });
         } else if (session.storyboard) {
           newMessages.push({
+            id: crypto.randomUUID(),
             type: 'assistant',
             message: session.storyboard,
             isEditable: true
@@ -312,6 +318,7 @@ export const useStoryChat = () => {
       } else if (session.question) {
         // Add the next question
         newMessages.push({
+          id: crypto.randomUUID(),
           type: 'assistant',
           message: session.question
         });
@@ -356,7 +363,7 @@ export const useStoryChat = () => {
           // Keep user message, remove loading message, add error message
           messages: [
             ...prev.messages.slice(0, messagesToKeep),
-            { type: 'assistant', message: 'Sorry, I encountered an error. Please try again.', isError: true }
+            { id: crypto.randomUUID(), type: 'assistant', message: 'Sorry, I encountered an error. Please try again.', isError: true }
           ]
         };
       });
@@ -395,6 +402,7 @@ export const useStoryChat = () => {
     setState(prev => {
       // Append loading message to the end
       const loadingMessage: ChatMessage = {
+        id: crypto.randomUUID(),
         type: 'assistant',
         message: 'Your video is generating...',
         isLoading: true
@@ -455,6 +463,7 @@ export const useStoryChat = () => {
 
             // Create completed video message
             const completedVideoMessage: ChatMessage = {
+              id: crypto.randomUUID(),
               type: 'assistant',
               message: 'Your video is ready!',
               videoUrl: result.video_url,
@@ -492,6 +501,7 @@ export const useStoryChat = () => {
           messages: [
             ...prev.messages.slice(0, messagesToKeep),
             {
+              id: crypto.randomUUID(),
               type: 'assistant',
               message: 'Sorry, video generation failed. Please try again.',
               isError: true

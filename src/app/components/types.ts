@@ -1,3 +1,5 @@
+import React from 'react';
+
 export type InputProps = {
     placeholder?: string;
     value?: string;
@@ -22,6 +24,7 @@ export type AvatarProps = {
 }
 
 export type ChatBoxProps = AvatarProps & {
+    id?: string;
     message: string;
     isLoading?: boolean;
     isError?: boolean;

@@ -3,9 +3,9 @@ import ChatItem from './ChatItem'
 import { ChatProps } from './types'
 
 const Chat = ({
-    messages, 
-    onEditMessage, 
-    onStartEditing, 
+    messages,
+    onEditMessage,
+    onStartEditing,
     onCancelEditing,
     videoGenerated = false,
     videoGenerating = false
@@ -17,12 +17,12 @@ const Chat = ({
     // Auto-scroll to bottom when messages change (for regular messages)
     useEffect(() => {
         // Check if there's a message that should scroll to (newly completed video)
-        const scrollToIndex = messages.findIndex((msg, idx) => 
-            msg.shouldScrollTo && 
-            msg.videoUrl && 
+        const scrollToIndex = messages.findIndex((msg, idx) =>
+            msg.shouldScrollTo &&
+            msg.videoUrl &&
             !scrolledToVideos.current.has(idx)
         );
-        
+
         if (scrollToIndex !== -1) {
             // Scroll to the newly completed video
             const videoElement = videoRefs.current.get(scrollToIndex);
@@ -51,7 +51,7 @@ const Chat = ({
         <div className='flex flex-col gap-4 overflow-y-auto'>
             {messages.map((message, index) => (
                 <div
-                    key={index}
+                    key={message.id || index}
                     ref={(el) => {
                         // Set ref for video messages that should scroll to
                         if (message.videoUrl && message.shouldScrollTo) {
@@ -59,9 +59,9 @@ const Chat = ({
                         }
                     }}
                 >
-                    <ChatItem 
-                        type={message.type} 
-                        message={message.message} 
+                    <ChatItem
+                        type={message.type}
+                        message={message.message}
                         isLoading={message.isLoading}
                         isError={message.isError}
                         images={message.images}
