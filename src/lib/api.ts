@@ -3,17 +3,17 @@
 const getApiBaseUrl = (): string => {
   // Check if we're in development mode
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   // If NEXT_PUBLIC_API_URL is explicitly set, use it
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
-  
+
   // Auto-detect based on environment
   if (isDevelopment) {
     return 'http://localhost:5000/api';
   }
-  
+
   // Production fallback
   return 'https://story-catcher-backend-v2.onrender.com/api';
 };
@@ -93,7 +93,7 @@ class StoryCatcherAPI {
   // Start a new story session
   async startSession(): Promise<StorySession> {
     const response = await this.makeRequest('/story/start', 'POST', {});
-    
+
     if (!response.success) {
       throw new Error(response.message || 'Failed to start session');
     }
@@ -138,7 +138,7 @@ class StoryCatcherAPI {
   // Get current question for a session
   async getCurrentQuestion(sessionId: string): Promise<StorySession> {
     const response = await this.makeRequest(`/story/current-question/${sessionId}`);
-    
+
     if (!response.success) {
       throw new Error(response.message || 'Failed to get current question');
     }
@@ -157,7 +157,7 @@ class StoryCatcherAPI {
   // Get session status
   async getSessionStatus(sessionId: string): Promise<StorySession> {
     const response = await this.makeRequest(`/story/session/${sessionId}`);
-    
+
     if (!response.success) {
       throw new Error(response.message || 'Failed to get session status');
     }
@@ -258,6 +258,19 @@ class StoryCatcherAPI {
     } catch (error) {
       console.error('Failed to save video to Supabase:', error);
       return { success: false, error: 'Failed to save video to Supabase' };
+    }
+  }
+
+  // Trigger backend to download video and store in Supabase
+  async processAndStoreVideo(apiFileId: string, sessionId: string): Promise<{ success: boolean; permanent_url?: string; error?: string }> {
+    try {
+      const response = await this.makeRequest(`/video/process-and-store/${apiFileId}`, 'POST', {
+        session_id: sessionId
+      });
+      return response;
+    } catch (error) {
+      console.error('Failed to process and store video:', error);
+      return { success: false, error: 'Failed to process and store video' };
     }
   }
 }

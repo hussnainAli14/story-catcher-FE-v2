@@ -186,34 +186,45 @@ export const useStoryChat = () => {
           const loadingState = result.result.loadingState;
 
           if (loadingState === 'FULFILLED') {
-            const finalVideoUrl = result.result.apiFileSignedUrl;
-            if (finalVideoUrl) {
-              // Save final video URL to Supabase if session exists AND email was provided
-              let supabaseSaveSuccess = true;
-              const shouldSaveToSupabase = hasEmailForSupabase !== undefined ? hasEmailForSupabase : state.hasEmailForSupabase;
+            // Video is ready! Trigger backend to download and store it permanently
+            const shouldSaveToSupabase = hasEmailForSupabase !== undefined ? hasEmailForSupabase : state.hasEmailForSupabase;
+            let finalVideoUrl = result.result.apiFileSignedUrl || '';
+            let supabaseSaveSuccess = false;
 
-              if (state.sessionId && shouldSaveToSupabase) {
-                try {
-                  const saveResult = await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
-                  if (!saveResult.success) {
-                    console.warn('Video saved but Supabase save failed:', saveResult.error);
-                    supabaseSaveSuccess = false;
-                  }
-                } catch (error) {
-                  console.error('Failed to save video to Supabase:', error);
+            if (state.sessionId && shouldSaveToSupabase) {
+              try {
+                // Call the new endpoint to download and store the video
+                const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId);
+
+                if (storeResult.success && storeResult.permanent_url) {
+                  finalVideoUrl = storeResult.permanent_url;
+                  supabaseSaveSuccess = true;
+                } else {
+                  console.warn('Video processed but storage failed:', storeResult.error);
+                  // Fallback to the signed URL if storage fails, but mark as failed save
                   supabaseSaveSuccess = false;
-                }
-              } else if (state.sessionId && !shouldSaveToSupabase) {
-                supabaseSaveSuccess = true;
-              }
 
+                  // Try to save just the link as a fallback
+                  if (finalVideoUrl) {
+                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
+                  }
+                }
+              } catch (error) {
+                console.error('Failed to process and store video:', error);
+                supabaseSaveSuccess = false;
+              }
+            } else if (state.sessionId && !shouldSaveToSupabase) {
+              // No email provided, just use the signed URL (temporary)
+              supabaseSaveSuccess = true; // Considered "success" as we didn't intend to save
+            }
+
+            if (finalVideoUrl) {
               // Remove the loading message and insert completed video at correct position
               setState(prev => {
                 // Remove the loading message (find the one with matching videogen URL)
                 const messagesWithoutLoading = prev.messages.filter(msg =>
                   !(msg.videoUrl === videoUrl && msg.isLoading)
                 );
-
 
                 // Find insertion point (right after storyboard)
                 const insertIndex = findVideoInsertionIndex(messagesWithoutLoading);
@@ -224,9 +235,9 @@ export const useStoryChat = () => {
                   type: 'assistant',
                   message: supabaseSaveSuccess
                     ? (shouldSaveToSupabase
-                      ? 'Your video is ready!'
+                      ? 'Your video is ready! (Saved permanently)'
                       : 'Your video is ready! (Saved locally - no email provided for database storage)')
-                    : 'Your video is ready! (Note: Video saved locally but not to our database)',
+                    : 'Your video is ready! (Note: Video saved locally but could not be stored permanently)',
                   videoUrl: finalVideoUrl,
                   isLoading: false,
                   shouldScrollTo: true // Flag to trigger auto-scroll
