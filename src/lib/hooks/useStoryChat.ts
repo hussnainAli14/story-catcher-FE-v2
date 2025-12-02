@@ -197,6 +197,7 @@ export const useStoryChat = () => {
                 // Call the new endpoint to download and store the video
                 // This works for both authenticated and anonymous users
                 const emailToSave = hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined);
+                console.log('[pollVideoStatus] Saving video with email:', emailToSave, 'state.email:', state.email, 'hasEmailForSupabase:', hasEmailForSupabase, 'state.hasEmailForSupabase:', state.hasEmailForSupabase);
                 const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, emailToSave);
 
                 if (storeResult.success && storeResult.permanent_url) {
@@ -390,9 +391,11 @@ export const useStoryChat = () => {
 
   // Store email temporarily (from popup)
   const storeEmail = useCallback((email?: string) => {
+    console.log('[storeEmail] Storing email:', email);
     setState(prev => ({
       ...prev,
       tempEmail: email || null,
+      email: email,
       hasEmailForSupabase: !!email // Track if email was provided
     }));
   }, []);
