@@ -174,7 +174,7 @@ export const useStoryChat = () => {
   }, [state.sessionId]);
 
   // Poll video status until completion
-  const pollVideoStatus = useCallback(async (videoUrl: string, hasEmailForSupabase?: boolean) => {
+  const pollVideoStatus = useCallback(async (videoUrl: string, hasEmailForSupabase?: boolean, userEmail?: string) => {
     if (!videoUrl.startsWith('videogen://')) return;
 
     const apiFileId = videoUrl.replace('videogen://', '');
@@ -196,8 +196,8 @@ export const useStoryChat = () => {
               try {
                 // Call the new endpoint to download and store the video
                 // This works for both authenticated and anonymous users
-                const emailToSave = hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined);
-                console.log('[pollVideoStatus] Saving video with email:', emailToSave, 'state.email:', state.email, 'hasEmailForSupabase:', hasEmailForSupabase, 'state.hasEmailForSupabase:', state.hasEmailForSupabase);
+                const emailToSave = userEmail || (hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined));
+                console.log('[pollVideoStatus] Saving video with email:', emailToSave, 'userEmail param:', userEmail, 'state.email:', state.email, 'hasEmailForSupabase:', hasEmailForSupabase, 'state.hasEmailForSupabase:', state.hasEmailForSupabase);
                 const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, emailToSave);
 
                 if (storeResult.success && storeResult.permanent_url) {
@@ -474,7 +474,7 @@ export const useStoryChat = () => {
         // Check if it's a videogen:// URL that needs polling
         if (result.video_url.startsWith('videogen://')) {
           // Start polling for video completion
-          pollVideoStatus(result.video_url, hasEmail);
+          pollVideoStatus(result.video_url, hasEmail, emailToUse || undefined);
         } else {
           // Direct video URL, show immediately at correct position (below storyboard)
           setState(prev => {
