@@ -26,6 +26,7 @@ export interface ChatState {
   videoGenerated: boolean;
   videoGenerating: boolean; // Track when video generation has started
   tempEmail: string | null; // Store email temporarily until video generation
+  email?: string; // Store confirmed email
   hasEmailForSupabase: boolean; // Track if email was provided for Supabase save
 }
 
@@ -195,7 +196,8 @@ export const useStoryChat = () => {
               try {
                 // Call the new endpoint to download and store the video
                 // This works for both authenticated and anonymous users
-                const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId);
+                const emailToSave = hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined);
+                const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, emailToSave);
 
                 if (storeResult.success && storeResult.permanent_url) {
                   finalVideoUrl = storeResult.permanent_url;
@@ -427,6 +429,8 @@ export const useStoryChat = () => {
       return {
         ...prev,
         videoGenerating: true,
+        email: emailToUse || undefined,
+        hasEmailForSupabase: hasEmail,
         messages: [...prev.messages, loadingMessage]
       };
     });
