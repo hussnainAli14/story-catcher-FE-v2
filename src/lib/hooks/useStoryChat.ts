@@ -191,9 +191,10 @@ export const useStoryChat = () => {
             let finalVideoUrl = result.result.apiFileSignedUrl || '';
             let supabaseSaveSuccess = false;
 
-            if (state.sessionId && shouldSaveToSupabase) {
+            if (state.sessionId) {
               try {
                 // Call the new endpoint to download and store the video
+                // This works for both authenticated and anonymous users
                 const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId);
 
                 if (storeResult.success && storeResult.permanent_url) {
@@ -201,7 +202,7 @@ export const useStoryChat = () => {
                   supabaseSaveSuccess = true;
                 } else {
                   console.warn('Video processed but storage failed:', storeResult.error);
-                  // Fallback to the signed URL if storage fails, but mark as failed save
+                  // Fallback to the signed URL if storage fails
                   supabaseSaveSuccess = false;
 
                   // Try to save just the link as a fallback
@@ -212,10 +213,16 @@ export const useStoryChat = () => {
               } catch (error) {
                 console.error('Failed to process and store video:', error);
                 supabaseSaveSuccess = false;
+
+                // Try to save just the link as a fallback
+                if (finalVideoUrl) {
+                  try {
+                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
+                  } catch (e) {
+                    console.error('Fallback save failed:', e);
+                  }
+                }
               }
-            } else if (state.sessionId && !shouldSaveToSupabase) {
-              // No email provided, just use the signed URL (temporary)
-              supabaseSaveSuccess = true; // Considered "success" as we didn't intend to save
             }
 
             if (finalVideoUrl) {
@@ -234,9 +241,7 @@ export const useStoryChat = () => {
                   id: crypto.randomUUID(),
                   type: 'assistant',
                   message: supabaseSaveSuccess
-                    ? (shouldSaveToSupabase
-                      ? 'Your video is ready! (Saved permanently)'
-                      : 'Your video is ready! (Saved locally - no email provided for database storage)')
+                    ? 'Your video is ready! (Saved permanently)'
                     : 'Your video is ready! (Note: Video saved locally but could not be stored permanently)',
                   videoUrl: finalVideoUrl,
                   isLoading: false,
