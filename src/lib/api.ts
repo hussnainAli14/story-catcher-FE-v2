@@ -248,11 +248,12 @@ class StoryCatcherAPI {
   }
 
   // Save final video URL to Supabase
-  async saveVideoToSupabase(sessionId: string, videoUrl: string): Promise<{ success: boolean; error?: string }> {
+  async saveVideoToSupabase(sessionId: string, videoUrl: string, email?: string): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await this.makeRequest('/video/save-to-supabase', 'POST', {
         session_id: sessionId,
-        video_url: videoUrl
+        video_url: videoUrl,
+        email: email
       });
       return response;
     } catch (error) {

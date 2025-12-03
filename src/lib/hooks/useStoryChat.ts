@@ -193,10 +193,11 @@ export const useStoryChat = () => {
             let supabaseSaveSuccess = false;
 
             if (state.sessionId) {
+              // Call the new endpoint to download and store the video
+              // This works for both authenticated and anonymous users
+              const emailToSave = userEmail || (hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined));
+
               try {
-                // Call the new endpoint to download and store the video
-                // This works for both authenticated and anonymous users
-                const emailToSave = userEmail || (hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined));
                 console.log('[pollVideoStatus] Saving video with email:', emailToSave, 'userEmail param:', userEmail, 'state.email:', state.email, 'hasEmailForSupabase:', hasEmailForSupabase, 'state.hasEmailForSupabase:', state.hasEmailForSupabase);
                 const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, emailToSave);
 
@@ -210,7 +211,7 @@ export const useStoryChat = () => {
 
                   // Try to save just the link as a fallback
                   if (finalVideoUrl) {
-                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
+                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl, emailToSave);
                   }
                 }
               } catch (error) {
@@ -220,7 +221,7 @@ export const useStoryChat = () => {
                 // Try to save just the link as a fallback
                 if (finalVideoUrl) {
                   try {
-                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl);
+                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl, emailToSave);
                   } catch (e) {
                     console.error('Fallback save failed:', e);
                   }
