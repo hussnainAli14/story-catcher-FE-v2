@@ -202,7 +202,10 @@ export const useStoryChat = () => {
                 const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, emailToSave);
 
                 if (storeResult.success && storeResult.permanent_url) {
-                  finalVideoUrl = storeResult.permanent_url;
+                  // Keep using the temporary URL for immediate playback reliability
+                  // The permanent URL is saved in the database for future access
+                  // finalVideoUrl = storeResult.permanent_url; 
+                  console.log('Video saved permanently to:', storeResult.permanent_url);
                   supabaseSaveSuccess = true;
                 } else {
                   console.warn('Video processed but storage failed:', storeResult.error);
