@@ -188,8 +188,8 @@ export const useStoryChat = () => {
 
           if (loadingState === 'FULFILLED') {
             // Video is ready! Trigger backend to download and store it permanently
-            const shouldSaveToSupabase = hasEmailForSupabase !== undefined ? hasEmailForSupabase : state.hasEmailForSupabase;
-            let finalVideoUrl = result.result.apiFileSignedUrl || '';
+            // const shouldSaveToSupabase = hasEmailForSupabase !== undefined ? hasEmailForSupabase : state.hasEmailForSupabase;
+            const finalVideoUrl = result.result.apiFileSignedUrl || '';
             let supabaseSaveSuccess = false;
 
             if (state.sessionId) {
@@ -205,7 +205,6 @@ export const useStoryChat = () => {
                   // Keep using the temporary URL for immediate playback reliability
                   // The permanent URL is saved in the database for future access
                   // finalVideoUrl = storeResult.permanent_url; 
-                  console.log('Video saved permanently to:', storeResult.permanent_url);
                   supabaseSaveSuccess = true;
                 } else {
                   console.warn('Video processed but storage failed:', storeResult.error);
@@ -286,7 +285,7 @@ export const useStoryChat = () => {
     };
 
     setTimeout(checkStatus, 5000);
-  }, [state.sessionId, state.hasEmailForSupabase]);
+  }, [state.sessionId, state.hasEmailForSupabase, state.email]);
 
   // Submit an answer
   const submitAnswer = useCallback(async (answer: string) => {
