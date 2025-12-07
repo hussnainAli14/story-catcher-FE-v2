@@ -212,6 +212,9 @@ export const useStoryChat = () => {
               const currentEmail = userEmail || emailRef.current || (hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined));
 
               try {
+                // Add a small delay to ensure VideoGen API is consistent across regions/calls
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
                 console.log('[pollVideoStatus] Saving video with email:', currentEmail, 'userEmail param:', userEmail, 'emailRef:', emailRef.current);
                 const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, currentEmail || undefined);
 
