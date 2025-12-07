@@ -4,10 +4,9 @@ import { Chat, ChatInput, Header, Popup, ErrorBoundary } from '../components'
 import { useStoryChat } from '@/lib/hooks/useStoryChat'
 
 const Intake = () => {
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [userInput, setUserInput] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
-    
+
     const {
         messages,
         currentQuestion,
@@ -19,6 +18,7 @@ const Intake = () => {
         showGenerateButton,
         videoGenerated,
         videoGenerating,
+        showEmailPopup,
         startSession,
         submitAnswer,
         storeEmail,
@@ -28,7 +28,8 @@ const Intake = () => {
         cancelEditing,
         resetSession,
         clearError,
-        checkBackendHealth
+        checkBackendHealth,
+        closeEmailPopup
     } = useStoryChat();
 
     // Check backend health on component mount
@@ -53,8 +54,8 @@ const Intake = () => {
     // No longer show popup early - email capture moved to Generate Video button
 
     const handleGenerateVideo = () => {
-        // Show email capture popup before generating video
-        setIsPopupOpen(true);
+        // Generate video immediately - popup will show after delay if needed
+        generateVideo();
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,18 +79,16 @@ const Intake = () => {
         resetSession();
         setHasStarted(false);
         setUserInput('');
-        setIsPopupOpen(false);
     };
 
     const handleClosePopup = () => {
-        setIsPopupOpen(false);
+        closeEmailPopup();
     };
 
     const handleEmailCapture = async (email?: string) => {
-        // Store email and generate video
+        // Store email - it will be used when video finishes generating
         storeEmail(email);
-        generateVideo(email); // Pass email directly to avoid state timing issues
-        setIsPopupOpen(false);
+        closeEmailPopup();
     };
 
     const getProgressText = () => {
@@ -106,8 +105,8 @@ const Intake = () => {
 
     return (
         <ErrorBoundary>
-            {isPopupOpen && <Popup handleClose={handleClosePopup} onGenerateVideo={handleEmailCapture} />}
-            <div className="h-screen flex flex-col" style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize:'cover', backgroundPosition:'center' }}>
+            {showEmailPopup && <Popup handleClose={handleClosePopup} onGenerateVideo={handleEmailCapture} />}
+            <div className="h-screen flex flex-col" style={{ backgroundImage: 'url(/images/background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <Header />
                 <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>
                     <div className="flex flex-col items-center gap-4 py-10">
@@ -133,19 +132,19 @@ const Intake = () => {
                             </div>
                         )}
                     </div>
-                    
-                    <Chat 
-                        messages={messages} 
+
+                    <Chat
+                        messages={messages}
                         onEditMessage={editMessage}
                         onStartEditing={startEditing}
                         onCancelEditing={cancelEditing}
                         videoGenerated={videoGenerated}
                         videoGenerating={videoGenerating}
                     />
-                    
+
                     {/* Input box positioned right under the chat */}
                     <div className='mt-6'>
-                        <ChatInput 
+                        <ChatInput
                             placeholder={getPlaceholderText()}
                             value={userInput}
                             onChange={handleInputChange}
@@ -153,18 +152,16 @@ const Intake = () => {
                             disabled={isLoading || isComplete}
                         />
                     </div>
-                    
+
                     {isComplete && (
                         <div className="mt-6 text-center space-y-4">
                             {/* Editing reminder */}
-                            <div className={`p-3 border rounded-lg ${
-                                videoGenerating 
-                                    ? 'bg-orange-50 border-orange-200' 
+                            <div className={`p-3 border rounded-lg ${videoGenerating
+                                    ? 'bg-orange-50 border-orange-200'
                                     : 'bg-yellow-50 border-yellow-200'
-                            }`}>
-                                <p className={`text-sm ${
-                                    videoGenerating ? 'text-orange-800' : 'text-yellow-800'
                                 }`}>
+                                <p className={`text-sm ${videoGenerating ? 'text-orange-800' : 'text-yellow-800'
+                                    }`}>
                                     {videoGenerating ? (
                                         <>⏳ <strong>Video Generating:</strong> Editing is disabled while your video is being created. You can edit after completion or start a new story.</>
                                     ) : (
@@ -172,7 +169,7 @@ const Intake = () => {
                                     )}
                                 </p>
                             </div>
-                            
+
                             {showGenerateButton && !videoGenerating && (
                                 <button
                                     onClick={handleGenerateVideo}
