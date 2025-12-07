@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { storyAPI, StorySession } from '../api';
 
 export interface ChatMessage {
@@ -70,6 +70,14 @@ export const useStoryChat = () => {
     autoVideoGenerationAttempted: false,
     showEmailPopup: false,
   });
+
+  // Use a ref to track the current email for the polling closure
+  const emailRef = useRef<string | null>(null);
+
+  // Update ref whenever state email changes
+  useEffect(() => {
+    emailRef.current = state.email || state.tempEmail || null;
+  }, [state.email, state.tempEmail]);
 
   // Load session from localStorage on mount
   useEffect(() => {
@@ -200,11 +208,12 @@ export const useStoryChat = () => {
             if (state.sessionId) {
               // Call the new endpoint to download and store the video
               // This works for both authenticated and anonymous users
-              const emailToSave = userEmail || (hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined));
+              // Use the ref to get the most up-to-date email (captured via popup during generation)
+              const currentEmail = userEmail || emailRef.current || (hasEmailForSupabase !== undefined ? (hasEmailForSupabase ? state.email : undefined) : (state.hasEmailForSupabase ? state.email : undefined));
 
               try {
-                console.log('[pollVideoStatus] Saving video with email:', emailToSave, 'userEmail param:', userEmail, 'state.email:', state.email, 'hasEmailForSupabase:', hasEmailForSupabase, 'state.hasEmailForSupabase:', state.hasEmailForSupabase);
-                const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, emailToSave);
+                console.log('[pollVideoStatus] Saving video with email:', currentEmail, 'userEmail param:', userEmail, 'emailRef:', emailRef.current);
+                const storeResult = await storyAPI.processAndStoreVideo(apiFileId, state.sessionId, currentEmail || undefined);
 
                 if (storeResult.success && storeResult.permanent_url) {
                   // Keep using the temporary URL for immediate playback reliability
@@ -218,7 +227,7 @@ export const useStoryChat = () => {
 
                   // Try to save just the link as a fallback
                   if (finalVideoUrl) {
-                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl, emailToSave);
+                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl, currentEmail || undefined);
                   }
                 }
               } catch (error) {
@@ -228,7 +237,7 @@ export const useStoryChat = () => {
                 // Try to save just the link as a fallback
                 if (finalVideoUrl) {
                   try {
-                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl, emailToSave);
+                    await storyAPI.saveVideoToSupabase(state.sessionId, finalVideoUrl, currentEmail || undefined);
                   } catch (e) {
                     console.error('Fallback save failed:', e);
                   }
@@ -296,8 +305,9 @@ export const useStoryChat = () => {
   const generateVideo = useCallback(async (email?: string) => {
     if (!state.sessionId) return;
 
-    // Use provided email or fall back to stored email
-    const emailToUse = email || state.tempEmail;
+    // Use provided email only (don't fall back to stored/stale email)
+    // We want to force a fresh email capture (or null) for each generation
+    const emailToUse = email;
     const hasEmail = !!emailToUse;
 
     // Find storyboard message index
@@ -325,6 +335,7 @@ export const useStoryChat = () => {
         ...prev,
         videoGenerating: true,
         email: emailToUse || undefined,
+        tempEmail: emailToUse || null, // Clear temp email to avoid reusing previous session's email
         hasEmailForSupabase: hasEmail,
         messages: [...prev.messages, loadingMessage]
       };
