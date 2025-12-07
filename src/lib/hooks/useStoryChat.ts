@@ -290,7 +290,6 @@ export const useStoryChat = () => {
     };
 
     setTimeout(checkStatus, 5000);
-    setTimeout(checkStatus, 5000);
   }, [state.sessionId, state.hasEmailForSupabase, state.email]);
 
   // Generate video from completed session (from Generate Video button)
