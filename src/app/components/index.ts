@@ -9,3 +9,4 @@ export { default as Chat } from "./Chat";
 export { default as Popup } from "./Popup";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export { default as Storyboard } from "./Storyboard";
+export { default as TipsCarousel } from "./TipsCarousel";

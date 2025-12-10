@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { Chat, ChatInput, Header, Popup, ErrorBoundary } from '../components'
+import { Chat, ChatInput, Header, Popup, ErrorBoundary, TipsCarousel } from '../components'
 import { useStoryChat } from '@/lib/hooks/useStoryChat'
 
 const Intake = () => {
@@ -29,7 +29,8 @@ const Intake = () => {
         resetSession,
         clearError,
         checkBackendHealth,
-        closeEmailPopup
+        closeEmailPopup,
+        emailSubmitted
     } = useStoryChat();
 
     // Check backend health on component mount
@@ -152,20 +153,16 @@ const Intake = () => {
 
                     {isComplete && (
                         <div className="mt-6 text-center space-y-4">
-                            {/* Editing reminder */}
-                            <div className={`p-3 border rounded-lg ${videoGenerating
-                                ? 'bg-orange-50 border-orange-200'
-                                : 'bg-yellow-50 border-yellow-200'
-                                }`}>
-                                <p className={`text-sm ${videoGenerating ? 'text-orange-800' : 'text-yellow-800'
-                                    }`}>
-                                    {videoGenerating ? (
-                                        <>⏳ <strong>Video Generating:</strong> Editing is disabled while your video is being created. You can edit after completion or start a new story.</>
-                                    ) : (
-                                        <>💡 <strong>Tip:</strong> You can edit your storyboard above before generating your video. Look for the &quot;✏️ Edit&quot; button when you hover over the storyboard.</>
-                                    )}
-                                </p>
-                            </div>
+                            {/* Editing reminder / Tips Carousel */}
+                            {videoGenerating ? (
+                                <TipsCarousel phase={emailSubmitted ? 'email-submitted' : 'start'} />
+                            ) : (
+                                <div className="p-3 border rounded-lg bg-yellow-50 border-yellow-200">
+                                    <p className="text-sm text-yellow-800">
+                                        💡 <strong>Tip:</strong> You can edit your storyboard above before generating your video. Look for the &quot;✏️ Edit&quot; button when you hover over the storyboard.
+                                    </p>
+                                </div>
+                            )}
 
                             {showGenerateButton && !videoGenerating && (
                                 <button

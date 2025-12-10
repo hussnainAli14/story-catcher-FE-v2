@@ -30,6 +30,7 @@ export interface ChatState {
   hasEmailForSupabase: boolean; // Track if email was provided for Supabase save
   autoVideoGenerationAttempted: boolean; // Track if auto-generation has been attempted
   showEmailPopup: boolean; // Track if email popup should be shown
+  emailSubmitted: boolean; // Track if email has been submitted
 }
 
 const SESSION_STORAGE_KEY = 'story-catcher-session';
@@ -69,6 +70,7 @@ export const useStoryChat = () => {
     hasEmailForSupabase: false,
     autoVideoGenerationAttempted: false,
     showEmailPopup: false,
+    emailSubmitted: false,
   });
 
   // Use a ref to track the current email for the polling closure
@@ -600,7 +602,8 @@ export const useStoryChat = () => {
       ...prev,
       tempEmail: email || null,
       email: email,
-      hasEmailForSupabase: !!email // Track if email was provided
+      hasEmailForSupabase: !!email, // Track if email was provided
+      emailSubmitted: !!email
     }));
   }, []);
 
@@ -667,6 +670,7 @@ export const useStoryChat = () => {
       hasEmailForSupabase: false,
       autoVideoGenerationAttempted: false,
       showEmailPopup: false,
+      emailSubmitted: false,
     });
   }, []);
 
@@ -695,5 +699,6 @@ export const useStoryChat = () => {
     clearError,
     checkBackendHealth,
     closeEmailPopup,
+    emailSubmitted: state.emailSubmitted,
   };
 };
