@@ -2,8 +2,16 @@ import React from 'react'
 
 const Header = () => {
     return (
-        <header className='font-tektur text-3xl w-full px-12 py-6 bg-forest text-mist uppercase'>
-            <h1>Story Catcher</h1>
+        <header className='w-full px-12 py-6 bg-forest text-mist flex justify-between items-center'>
+            <div className="flex flex-col">
+                <h1 className='font-poppins text-3xl uppercase tracking-wider'>STORY CATCHER</h1>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-light">by Numina</span>
+                </div>
+            </div>
+            <div className="text-sm font-light italic opacity-80 hidden md:block">
+                Visualize Your Moment of Realization
+            </div>
         </header>
     )
 }

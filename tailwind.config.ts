@@ -11,6 +11,7 @@ const config: Config = {
       fontFamily: {
         tektur: ["Tektur", "sans-serif"],
         "space-mono": ["Space Mono", "monospace"],
+        poppins: ["var(--font-poppins)", "sans-serif"],
       },
     },
   },

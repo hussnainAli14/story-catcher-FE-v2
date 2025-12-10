@@ -91,16 +91,16 @@ const Intake = () => {
         closeEmailPopup();
     };
 
-    const getProgressText = () => {
-        if (isComplete) return "Story Complete!";
-        if (currentQuestion > 0) return `Question ${currentQuestion} of ${totalQuestions}`;
-        return "Starting your story...";
-    };
-
     const getPlaceholderText = () => {
         if (isComplete) return "Your story is complete!";
-        if (isLoading) return "Generating your story...";
-        return "Type your answer here...";
+        if (isLoading) {
+            if (currentQuestion === 1) return "Completing question 1 of 4";
+            if (currentQuestion === 2) return "Completing question 2 of 4";
+            if (currentQuestion === 3) return "Completing question 3 of 4";
+            if (currentQuestion === 4) return "Writing the script for your video";
+            return "Generating your story...";
+        }
+        return `Q${currentQuestion} of ${totalQuestions}: Type your answer here...`;
     };
 
     return (
@@ -111,12 +111,9 @@ const Intake = () => {
                 <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>
                     <div className="flex flex-col items-center gap-4 py-10">
                         <h1 className='text-3xl font-bold text-center font-tektur text-forest'>
-                            Answer a Few Questions to Generate Your Video
+                            Start your story interview
                         </h1>
                         <div className="flex items-center gap-4">
-                            <span className="text-sm font-space-mono text-forest bg-white/80 px-3 py-1 rounded-full">
-                                {getProgressText()}
-                            </span>
                             {error && (
                                 <button
                                     onClick={clearError}
@@ -157,8 +154,8 @@ const Intake = () => {
                         <div className="mt-6 text-center space-y-4">
                             {/* Editing reminder */}
                             <div className={`p-3 border rounded-lg ${videoGenerating
-                                    ? 'bg-orange-50 border-orange-200'
-                                    : 'bg-yellow-50 border-yellow-200'
+                                ? 'bg-orange-50 border-orange-200'
+                                : 'bg-yellow-50 border-yellow-200'
                                 }`}>
                                 <p className={`text-sm ${videoGenerating ? 'text-orange-800' : 'text-yellow-800'
                                     }`}>
