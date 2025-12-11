@@ -28,6 +28,7 @@ export interface StorySession {
   question_number?: number;
   total_questions?: number;
   session_complete?: boolean;
+  ready_for_storyboard?: boolean;
   storyboard?: string;
   storyboard_generating?: boolean;
   images?: string[];
@@ -51,6 +52,7 @@ export interface ApiResponse {
   question_number?: number;
   total_questions?: number;
   session_complete?: boolean;
+  ready_for_storyboard?: boolean;
   storyboard?: string;
   storyboard_generating?: boolean;
   images?: string[];
@@ -273,6 +275,19 @@ class StoryCatcherAPI {
     } catch (error) {
       console.error('Failed to process and store video:', error);
       return { success: false, error: 'Failed to process and store video' };
+    }
+  }
+
+  // Generate storyboard for a completed session
+  async generateStoryboard(sessionId: string): Promise<{ success: boolean; storyboard?: string; error?: string }> {
+    try {
+      const response = await this.makeRequest('/story/generate-storyboard', 'POST', {
+        session_id: sessionId
+      });
+      return response;
+    } catch (error) {
+      console.error('Storyboard generation failed:', error);
+      return { success: false, error: 'Failed to generate storyboard' };
     }
   }
 }

@@ -490,6 +490,45 @@ export const useStoryChat = () => {
     generateVideo
   ]);
 
+  // Internal function to generate storyboard
+  const generateStoryboardInternal = useCallback(async (sessionId: string) => {
+    try {
+      const result = await storyAPI.generateStoryboard(sessionId);
+
+      if (result.success && result.storyboard) {
+        setState(prev => ({
+          ...prev,
+          showGenerateButton: true,
+          messages: prev.messages.map(msg =>
+            msg.isLoading && msg.message === 'Generating your storyboard...'
+              ? { ...msg, message: result.storyboard!, isLoading: false, isEditable: true }
+              : msg
+          )
+        }));
+      } else {
+        // Handle error by updating loading message
+        setState(prev => ({
+          ...prev,
+          messages: prev.messages.map(msg =>
+            msg.isLoading && msg.message === 'Generating your storyboard...'
+              ? { ...msg, message: 'Sorry, failed to generate storyboard. Please try again.', isLoading: false, isError: true }
+              : msg
+          )
+        }));
+      }
+    } catch (error) {
+      console.error('Error generating storyboard:', error);
+      setState(prev => ({
+        ...prev,
+        messages: prev.messages.map(msg =>
+          msg.isLoading && msg.message === 'Generating your storyboard...'
+            ? { ...msg, message: 'Sorry, an error occurred while generating the storyboard.', isLoading: false, isError: true }
+            : msg
+        )
+      }));
+    }
+  }, []);
+
   // Submit an answer
   const submitAnswer = useCallback(async (answer: string) => {
     if (!state.sessionId || state.isComplete) return;
@@ -522,9 +561,20 @@ export const useStoryChat = () => {
         { id: crypto.randomUUID(), type: 'assistant', message: session.message }
       ];
 
+      let triggerStoryboardGeneration = false;
+
       // If session is complete, add the storyboard (no video yet)
       if (session.session_complete) {
-        if (session.storyboard_generating) {
+        if (session.ready_for_storyboard) {
+          // Add loading message for storyboard generation
+          newMessages.push({
+            id: crypto.randomUUID(),
+            type: 'assistant',
+            message: 'Generating your storyboard...',
+            isLoading: true
+          });
+          triggerStoryboardGeneration = true;
+        } else if (session.storyboard_generating) {
           // Storyboard is still generating, add polling message
           newMessages.push({
             id: crypto.randomUUID(),
@@ -558,7 +608,7 @@ export const useStoryChat = () => {
           currentQuestion: session.question_number || prev.currentQuestion + 1,
           totalQuestions: session.total_questions || prev.totalQuestions,
           isComplete: session.session_complete || false,
-          showGenerateButton: session.session_complete ? true : prev.showGenerateButton,
+          showGenerateButton: (session.session_complete && !triggerStoryboardGeneration) ? true : prev.showGenerateButton,
           // Keep user message, remove loading message, add new response
           messages: [
             ...prev.messages.slice(0, messagesToKeep),
@@ -568,13 +618,19 @@ export const useStoryChat = () => {
           error: null,
         };
 
-        // Start polling if storyboard is generating
+        // Start polling if storyboard is generating (old flow)
         if (session.storyboard_generating) {
           setTimeout(() => pollStoryboardStatus(), 1000);
         }
 
         return newState;
       });
+
+      // Trigger storyboard generation if needed (new flow)
+      if (triggerStoryboardGeneration) {
+        generateStoryboardInternal(state.sessionId);
+      }
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit answer';
       setState(prev => {
@@ -593,7 +649,7 @@ export const useStoryChat = () => {
         };
       });
     }
-  }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus]);
+  }, [state.sessionId, state.currentQuestion, state.isComplete, pollStoryboardStatus, generateStoryboardInternal]);
 
   // Store email temporarily (from popup)
   const storeEmail = useCallback((email?: string) => {
