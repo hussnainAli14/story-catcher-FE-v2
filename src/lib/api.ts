@@ -130,6 +130,7 @@ class StoryCatcherAPI {
       question_number: response.question_number,
       total_questions: response.total_questions,
       session_complete: response.session_complete || false,
+      ready_for_storyboard: response.ready_for_storyboard,
       storyboard: response.storyboard,
       storyboard_generating: response.storyboard_generating || false,
       images: response.images,
