@@ -491,9 +491,12 @@ export const useStoryChat = () => {
   ]);
 
   // Internal function to generate storyboard
+  // Internal function to generate storyboard
   const generateStoryboardInternal = useCallback(async (sessionId: string) => {
+    console.log('[generateStoryboardInternal] Starting generation for session:', sessionId);
     try {
       const result = await storyAPI.generateStoryboard(sessionId);
+      console.log('[generateStoryboardInternal] Result:', result);
 
       if (result.success && result.storyboard) {
         setState(prev => ({
@@ -506,6 +509,7 @@ export const useStoryChat = () => {
           )
         }));
       } else {
+        console.error('[generateStoryboardInternal] Failed:', result.error);
         // Handle error by updating loading message
         setState(prev => ({
           ...prev,
@@ -517,7 +521,7 @@ export const useStoryChat = () => {
         }));
       }
     } catch (error) {
-      console.error('Error generating storyboard:', error);
+      console.error('[generateStoryboardInternal] Exception:', error);
       setState(prev => ({
         ...prev,
         messages: prev.messages.map(msg =>
