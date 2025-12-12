@@ -504,7 +504,7 @@ export const useStoryChat = () => {
           showGenerateButton: true,
           messages: prev.messages.map(msg =>
             msg.isLoading && msg.message === 'Generating your storyboard...'
-              ? { ...msg, message: result.storyboard!, isLoading: false, isEditable: true }
+              ? { ...msg, message: result.storyboard!, isLoading: false, isEditable: false }
               : msg
           )
         }));
@@ -591,7 +591,7 @@ export const useStoryChat = () => {
             id: crypto.randomUUID(),
             type: 'assistant',
             message: session.storyboard,
-            isEditable: true
+            isEditable: false
           });
         }
       } else if (session.question) {

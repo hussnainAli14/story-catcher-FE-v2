@@ -153,15 +153,9 @@ const Intake = () => {
 
                     {isComplete && (
                         <div className="mt-6 text-center space-y-4">
-                            {/* Editing reminder / Tips Carousel */}
-                            {videoGenerating ? (
+                            {/* Tips Carousel only shows during video generation */}
+                            {videoGenerating && (
                                 <TipsCarousel phase={emailSubmitted ? 'email-submitted' : 'start'} />
-                            ) : (
-                                <div className="p-3 border rounded-lg bg-yellow-50 border-yellow-200">
-                                    <p className="text-sm text-yellow-800">
-                                        💡 <strong>Tip:</strong> You can edit your storyboard above before generating your video. Look for the &quot;✏️ Edit&quot; button when you hover over the storyboard.
-                                    </p>
-                                </div>
                             )}
 
                             {showGenerateButton && !videoGenerating && (
