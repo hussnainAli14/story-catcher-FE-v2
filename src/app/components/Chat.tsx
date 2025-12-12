@@ -23,6 +23,14 @@ const Chat = ({
             !scrolledToVideos.current.has(idx)
         );
 
+        // Check if the last message is a storyboard (and not loading)
+        const lastMessageIndex = messages.length - 1;
+        const lastMessage = messages[lastMessageIndex];
+        const isStoryboardReady = lastMessage &&
+            lastMessage.type === 'assistant' &&
+            lastMessage.message.includes('**Storyboard:') &&
+            !lastMessage.isLoading;
+
         if (scrollToIndex !== -1) {
             // Scroll to the newly completed video
             const videoElement = videoRefs.current.get(scrollToIndex);
@@ -33,8 +41,20 @@ const Chat = ({
                     scrolledToVideos.current.add(scrollToIndex);
                 }, 100); // Small delay to ensure DOM is updated
             }
+        } else if (isStoryboardReady) {
+            // If storyboard is ready, scroll to the message BEFORE it (the "Thank you" message)
+            // or to the top of the storyboard if no previous message
+            const targetIndex = lastMessageIndex > 0 ? lastMessageIndex - 1 : lastMessageIndex;
+            const targetElement = videoRefs.current.get(targetIndex);
+
+            if (targetElement) {
+                setTimeout(() => {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
         } else if (chatEndRef.current) {
             // Otherwise scroll to bottom for regular messages
+            // Only scroll if we didn't just scroll to storyboard
             chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
@@ -57,6 +77,9 @@ const Chat = ({
                         if (message.videoUrl && message.shouldScrollTo) {
                             setVideoRef(index, el);
                         }
+                        // Also set ref for storyboard messages (or messages right before them)
+                        // We store all refs to be safe for custom scrolling logic
+                        setVideoRef(index, el);
                     }}
                 >
                     <ChatItem

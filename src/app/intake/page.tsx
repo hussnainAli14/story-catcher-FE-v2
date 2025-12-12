@@ -99,7 +99,7 @@ const Intake = () => {
             if (currentQuestion === 2) return "Completing question 2 of 4";
             if (currentQuestion === 3) return "Completing question 3 of 4";
             if (currentQuestion === 4) return "Writing the script for your video";
-            return "Generating your story...";
+            return "Writing your script (Few seconds)";
         }
         return `Q${currentQuestion} of ${totalQuestions}: Type your answer here...`;
     };
