@@ -7,12 +7,12 @@ interface TipsCarouselProps {
 const EARLY_LOOP = [
     "Your video will be ready in about 1 minute",
     "Meanwhile, the script for your video is below",
-    "Take a few seconds to read the script--you will be able to edit later"
+    "Take a few seconds to read the script you will be able to edit later"
 ];
 
 const LATE_LOOP = [
     "The script for your video is below",
-    "Take a few seconds to read the script--you will be able to edit later",
+    "Take a few seconds to read the script you will be able to edit later",
     "Your video will appear below very shortly",
     "If you choose, then you can edit the script",
     "And generate a revised video"
@@ -22,7 +22,7 @@ const THANK_YOU_SEQUENCE = [
     "Thank you!",
     "Your video will be anonymous",
     "Each month we will select the most moving Moment of Realization video",
-    "If you choose, we will publish these on the Moments of Realization website--winning entries are guaranteed 10,000 views"
+    "If you choose, we will publish these on the Moments of Realization website winning entries are guaranteed 10,000 views"
 ];
 
 const TipsCarousel = ({ phase }: TipsCarouselProps) => {

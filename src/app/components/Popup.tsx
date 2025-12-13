@@ -66,7 +66,7 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                             )}
 
                             <p className='text-sm text-slate text-center italic font-medium'>
-                                This is kept totally private--we will never sell nor spam
+                                This is kept totally private we will never sell nor spam
                             </p>
                         </div>
 
@@ -93,7 +93,7 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                                     Each month we will select the most moving <strong>Moment of Realization</strong> video.
                                 </p>
                                 <p className="text-gray-700">
-                                    If you choose, we will publish these on the Moments of Realization channel--winning entries are guaranteed <strong>10,000 views</strong>.
+                                    If you choose, we will publish these on the Moments of Realization channel winning entries are guaranteed <strong>10,000 views</strong>.
                                 </p>
                             </div>
                         </div>
