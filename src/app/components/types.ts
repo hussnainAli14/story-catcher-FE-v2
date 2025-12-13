@@ -30,6 +30,8 @@ export type ChatBoxProps = AvatarProps & {
     isError?: boolean;
     images?: string[];
     videoUrl?: string;
+    permanentUrl?: string;
+    downloadUrl?: string;
     videoHistory?: string[]; // Array of all videos generated for this storyboard
     isEditable?: boolean;
     isEditing?: boolean;
@@ -38,6 +40,8 @@ export type ChatBoxProps = AvatarProps & {
     onCancelEdit?: () => void;
     videoGenerating?: boolean;
     shouldScrollTo?: boolean; // Flag to trigger scroll when video is ready
+    onStartNewStory?: () => void;
+    onEditStoryboard?: () => void;
 }
 
 export type ChatProps = {
@@ -45,6 +49,7 @@ export type ChatProps = {
     onEditMessage?: (index: number, newMessage: string) => void;
     onStartEditing?: (index: number) => void;
     onCancelEditing?: (index: number) => void;
+    onStartNewStory?: () => void;
     videoGenerated?: boolean;
     videoGenerating?: boolean;
 }

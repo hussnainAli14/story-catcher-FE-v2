@@ -5,19 +5,26 @@ interface StoryboardProps {
   content: string;
   images?: string[];
   videoUrl?: string;
+  permanentUrl?: string;
+  downloadUrl?: string;
   videoHistory?: string[]; // All videos for this storyboard
   videoGenerating?: boolean;
+  onStartNewStory?: () => void;
+  onEditScript?: () => void;
 }
 
 const Storyboard: React.FC<StoryboardProps> = ({
   content,
   images = [],
   videoUrl,
+  permanentUrl,
+  downloadUrl,
   videoHistory = [],
-  videoGenerating = false
+  videoGenerating = false,
+  onStartNewStory,
+  onEditScript
 }) => {
   const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
-  const [showDownloadInstructions, setShowDownloadInstructions] = useState(false);
 
   // Update current video URL when prop changes
   useEffect(() => {
@@ -26,9 +33,19 @@ const Storyboard: React.FC<StoryboardProps> = ({
 
   // Function to download video
   const downloadVideo = async (url: string) => {
+    // Prefer downloadUrl if available (it has Content-Disposition: attachment), then permanentUrl, then url
+    let targetUrl = url;
+    if (url === videoUrl) {
+      if (downloadUrl) {
+        targetUrl = downloadUrl;
+      } else if (permanentUrl) {
+        targetUrl = permanentUrl;
+      }
+    }
+
     try {
       // Fetch the video as a blob and create a download link
-      const response = await fetch(url);
+      const response = await fetch(targetUrl);
       if (!response.ok) {
         throw new Error('Failed to fetch video');
       }
@@ -49,10 +66,9 @@ const Storyboard: React.FC<StoryboardProps> = ({
       window.URL.revokeObjectURL(downloadUrl);
 
     } catch (error) {
-      console.error('Error downloading video:', error);
-      // Fallback: show user instructions
-      setShowDownloadInstructions(true);
-      setTimeout(() => setShowDownloadInstructions(false), 5000); // Hide after 5 seconds
+      console.error('Error downloading video via blob, falling back to direct link:', error);
+      // Fallback: try to open in new tab which might trigger download or play
+      window.open(targetUrl, '_blank');
     }
   };
 
@@ -134,18 +150,25 @@ const Storyboard: React.FC<StoryboardProps> = ({
                     <source src={currentVideoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
-                  <div className="mt-3 text-center">
+                  <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
                     <button
                       onClick={() => downloadVideo(currentVideoUrl)}
-                      className="px-4 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono text-sm flex items-center gap-2 mx-auto"
+                      className="px-4 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono text-sm flex items-center gap-2"
                     >
                       📥 Download Video
                     </button>
-                    {showDownloadInstructions && (
-                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-                        💡 If download doesn&apos;t start automatically, right-click on the video above and select &quot;Save video as...&quot;
-                      </div>
-                    )}
+                    <button
+                      onClick={onEditScript}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-space-mono text-sm flex items-center gap-2"
+                    >
+                      ✏️ Edit Script
+                    </button>
+                    <button
+                      onClick={onStartNewStory}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-space-mono text-sm flex items-center gap-2"
+                    >
+                      🔄 Start New Story
+                    </button>
                   </div>
                 </>
               )}
@@ -268,11 +291,6 @@ const Storyboard: React.FC<StoryboardProps> = ({
               <h3 className="text-lg font-bold text-black">
                 🎬 Latest Video
               </h3>
-              {videoHistory.length > 1 && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                  {videoHistory.length} videos generated
-                </span>
-              )}
             </div>
             <div className="space-y-3">
               {currentVideoUrl.startsWith('videogen://') ? (
@@ -296,42 +314,28 @@ const Storyboard: React.FC<StoryboardProps> = ({
                     <source src={currentVideoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
-                  <div className="mt-3 text-center">
+                  <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
                     <button
                       onClick={() => downloadVideo(currentVideoUrl)}
-                      className="px-4 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono text-sm flex items-center gap-2 mx-auto"
+                      className="px-4 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono text-sm flex items-center gap-2"
                     >
-                      📥 Download Latest Video
+                      📥 Download Video
+                    </button>
+                    <button
+                      onClick={onEditScript}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-space-mono text-sm flex items-center gap-2"
+                    >
+                      ✏️ Edit Script
+                    </button>
+                    <button
+                      onClick={onStartNewStory}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-space-mono text-sm flex items-center gap-2"
+                    >
+                      🔄 Start New Story
                     </button>
                   </div>
                 </>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Previous Videos Section - Only show if there are older videos */}
-        {videoHistory && videoHistory.length > 1 && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">
-              📼 Previous Videos ({videoHistory.length - 1})
-            </h4>
-            <div className="space-y-2">
-              {videoHistory.slice(1).map((historyVideoUrl, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
-                  <span className="text-gray-600">
-                    Video #{videoHistory.length - index - 1}
-                  </span>
-                  {!historyVideoUrl.startsWith('videogen://') && (
-                    <button
-                      onClick={() => downloadVideo(historyVideoUrl)}
-                      className="text-xs px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-                    >
-                      📥 Download
-                    </button>
-                  )}
-                </div>
-              ))}
             </div>
           </div>
         )}

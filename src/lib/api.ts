@@ -266,7 +266,7 @@ class StoryCatcherAPI {
   }
 
   // Trigger backend to download video and store in Supabase
-  async processAndStoreVideo(apiFileId: string, sessionId: string, email?: string): Promise<{ success: boolean; permanent_url?: string; error?: string }> {
+  async processAndStoreVideo(apiFileId: string, sessionId: string, email?: string): Promise<{ success: boolean; permanent_url?: string; download_url?: string; error?: string }> {
     try {
       const response = await this.makeRequest(`/video/process-and-store/${apiFileId}`, 'POST', {
         session_id: sessionId,

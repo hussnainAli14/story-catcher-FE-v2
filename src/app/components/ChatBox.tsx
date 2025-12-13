@@ -9,13 +9,17 @@ const ChatBox = ({
     isError,
     images,
     videoUrl,
+    permanentUrl,
+    downloadUrl,
     videoHistory,
     isEditable = false,
     isEditing = false,
     onEdit,
     onStartEdit,
     onCancelEdit,
-    videoGenerating = false
+    videoGenerating = false,
+    onStartNewStory,
+    onEditStoryboard
 }: ChatBoxProps) => {
     const [editText, setEditText] = useState(message);
 
@@ -101,8 +105,12 @@ const ChatBox = ({
                         content={message}
                         images={images}
                         videoUrl={videoUrl}
+                        permanentUrl={permanentUrl}
+                        downloadUrl={downloadUrl}
                         videoHistory={videoHistory}
                         videoGenerating={videoGenerating}
+                        onStartNewStory={onStartNewStory}
+                        onEditScript={onStartEdit}
                     />
                     {isEditable && !videoGenerating && (
                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -126,7 +134,11 @@ const ChatBox = ({
                         content=""
                         images={images}
                         videoUrl={videoUrl}
+                        permanentUrl={permanentUrl}
+                        downloadUrl={downloadUrl}
                         videoHistory={videoHistory}
+                        onStartNewStory={onStartNewStory}
+                        onEditScript={onEditStoryboard}
                     />
                 </div>
             ) : (

@@ -9,6 +9,8 @@ export interface ChatMessage {
   isError?: boolean;
   images?: string[];
   videoUrl?: string;
+  permanentUrl?: string;
+  downloadUrl?: string;
   isEditable?: boolean;
   isEditing?: boolean;
   shouldScrollTo?: boolean; // Flag to trigger scroll when video is ready
@@ -203,8 +205,9 @@ export const useStoryChat = () => {
 
           if (loadingState === 'FULFILLED') {
             // Video is ready! Trigger backend to download and store it permanently
-            // const shouldSaveToSupabase = hasEmailForSupabase !== undefined ? hasEmailForSupabase : state.hasEmailForSupabase;
             const finalVideoUrl = result.result.apiFileSignedUrl || '';
+            let permanentUrl: string | undefined;
+            let downloadUrl: string | undefined;
             let supabaseSaveSuccess = false;
 
             if (state.sessionId) {
@@ -224,6 +227,8 @@ export const useStoryChat = () => {
                   // Keep using the temporary URL for immediate playback reliability
                   // The permanent URL is saved in the database for future access
                   // finalVideoUrl = storeResult.permanent_url; 
+                  permanentUrl = storeResult.permanent_url;
+                  downloadUrl = storeResult.download_url;
                   supabaseSaveSuccess = true;
                 } else {
                   console.warn('Video processed but storage failed:', storeResult.error);
@@ -269,6 +274,8 @@ export const useStoryChat = () => {
                     ? 'Your video is ready! (Saved permanently)'
                     : 'Your video is ready! (Note: Video saved locally but could not be stored permanently)',
                   videoUrl: finalVideoUrl,
+                  permanentUrl: permanentUrl,
+                  downloadUrl: downloadUrl,
                   isLoading: false,
                   shouldScrollTo: true // Flag to trigger auto-scroll
                 };
@@ -504,7 +511,7 @@ export const useStoryChat = () => {
           showGenerateButton: true,
           messages: prev.messages.map(msg =>
             msg.isLoading && msg.message === 'Generating your storyboard...'
-              ? { ...msg, message: result.storyboard!, isLoading: false, isEditable: false }
+              ? { ...msg, message: result.storyboard!, isLoading: false, isEditable: true }
               : msg
           )
         }));
@@ -591,7 +598,7 @@ export const useStoryChat = () => {
             id: crypto.randomUUID(),
             type: 'assistant',
             message: session.storyboard,
-            isEditable: false
+            isEditable: true
           });
         }
       } else if (session.question) {

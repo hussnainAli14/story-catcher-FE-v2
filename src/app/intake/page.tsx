@@ -137,6 +137,7 @@ const Intake = () => {
                         onEditMessage={editMessage}
                         onStartEditing={startEditing}
                         onCancelEditing={cancelEditing}
+                        onStartNewStory={handleReset}
                         videoGenerated={videoGenerated}
                         videoGenerating={videoGenerating}
                     />
@@ -154,11 +155,6 @@ const Intake = () => {
 
                     {isComplete && (
                         <div className="mt-6 text-center space-y-4">
-                            {/* Tips Carousel only shows during video generation */}
-                            {videoGenerating && (
-                                <TipsCarousel phase={emailSubmitted ? 'email-submitted' : 'start'} />
-                            )}
-
                             {showGenerateButton && !videoGenerating && (
                                 <button
                                     onClick={handleGenerateVideo}

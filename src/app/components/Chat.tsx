@@ -8,11 +8,26 @@ const Chat = ({
     onStartEditing,
     onCancelEditing,
     videoGenerated = false,
-    videoGenerating = false
+    videoGenerating = false,
+    onStartNewStory
 }: ChatProps) => {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const videoRefs = useRef<Map<number, HTMLDivElement>>(new Map());
     const scrolledToVideos = useRef<Set<number>>(new Set());
+
+    // Find the storyboard message index
+    const storyboardIndex = messages.findIndex(msg =>
+        msg.type === 'assistant' &&
+        (msg.message.includes('**Storyboard:') || msg.message.includes('**Your video will be ready')) &&
+        msg.message.includes('**Scene') &&
+        !msg.isLoading
+    );
+
+    const handleEditStoryboard = () => {
+        if (storyboardIndex !== -1 && onStartEditing) {
+            onStartEditing(storyboardIndex);
+        }
+    };
 
     // Auto-scroll to bottom when messages change (for regular messages)
     useEffect(() => {
@@ -95,6 +110,8 @@ const Chat = ({
                         onEdit={(newMessage) => onEditMessage?.(index, newMessage)}
                         onStartEdit={() => onStartEditing?.(index)}
                         onCancelEdit={() => onCancelEditing?.(index)}
+                        onStartNewStory={onStartNewStory}
+                        onEditStoryboard={handleEditStoryboard}
                     />
                 </div>
             ))}

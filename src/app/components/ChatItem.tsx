@@ -5,11 +5,11 @@ import { ChatBoxProps } from './types'
 import { useWindowWidth } from '@/lib/hooks/useWindowWidth'
 
 const ChatItem = ({
-    type="assistant", 
-    message, 
-    isLoading, 
-    isError, 
-    images, 
+    type = "assistant",
+    message,
+    isLoading,
+    isError,
+    images,
     videoUrl,
     videoHistory,
     isEditable,
@@ -17,18 +17,20 @@ const ChatItem = ({
     videoGenerating,
     onEdit,
     onStartEdit,
-    onCancelEdit
+    onCancelEdit,
+    onStartNewStory,
+    onEditStoryboard
 }: ChatBoxProps) => {
-   const isVisible = useWindowWidth();
+    const isVisible = useWindowWidth();
     return (
         <div className={`flex gap-4 ${type === "assistant" ? "flex-row-reverse" : "flex-row"}`}>
-          {isVisible && <Avatar type={type} />}
-            <ChatBox 
-                type={type} 
-                message={message} 
-                isLoading={isLoading} 
-                isError={isError} 
-                images={images} 
+            {isVisible && <Avatar type={type} />}
+            <ChatBox
+                type={type}
+                message={message}
+                isLoading={isLoading}
+                isError={isError}
+                images={images}
                 videoUrl={videoUrl}
                 videoHistory={videoHistory}
                 isEditable={isEditable}
@@ -37,6 +39,8 @@ const ChatItem = ({
                 onEdit={onEdit}
                 onStartEdit={onStartEdit}
                 onCancelEdit={onCancelEdit}
+                onStartNewStory={onStartNewStory}
+                onEditStoryboard={onEditStoryboard}
             />
         </div>
     )
