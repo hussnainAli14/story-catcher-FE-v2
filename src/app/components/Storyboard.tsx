@@ -168,12 +168,13 @@ const Storyboard: React.FC<StoryboardProps> = ({
       const trimmedLine = line.trim();
 
       // Extract title
-      if (trimmedLine.startsWith('**Storyboard:')) {
+      if (trimmedLine.startsWith('**Storyboard:') || trimmedLine.startsWith('**Your video will be ready')) {
         title = trimmedLine.replace(/\*\*Storyboard:\s*/, '').replace(/\*\*/g, '');
       }
       // Extract subtitle/description
-      else if (trimmedLine.startsWith('*This is')) {
-        subtitle = trimmedLine.replace(/\*/g, '');
+      else if (trimmedLine.startsWith('*This is') || trimmedLine.startsWith('Here is') || trimmedLine.startsWith('Take a few')) {
+        // Append to subtitle if it already exists
+        subtitle = subtitle ? `${subtitle} ${trimmedLine.replace(/\*/g, '')}` : trimmedLine.replace(/\*/g, '');
       }
       // Scene header
       else if (trimmedLine.match(/\*\*Scene\s+\d+:\*\*/)) {
@@ -218,8 +219,8 @@ const Storyboard: React.FC<StoryboardProps> = ({
 
         {/* Editing Instructions */}
         <div className={`mb-4 p-3 border rounded-lg ${videoGenerating
-            ? 'bg-orange-50 border-orange-200'
-            : 'bg-blue-50 border-blue-200'
+          ? 'bg-orange-50 border-orange-200'
+          : 'bg-blue-50 border-blue-200'
           }`}>
           <div className="flex items-center gap-2 mb-2">
             <span className={videoGenerating ? 'text-orange-600' : 'text-blue-600'}>

@@ -28,7 +28,7 @@ const Chat = ({
         const lastMessage = messages[lastMessageIndex];
         const isStoryboardReady = lastMessage &&
             lastMessage.type === 'assistant' &&
-            lastMessage.message.includes('**Storyboard:') &&
+            (lastMessage.message.includes('**Storyboard:') || lastMessage.message.includes('**Your video will be ready')) &&
             !lastMessage.isLoading;
 
         if (scrollToIndex !== -1) {

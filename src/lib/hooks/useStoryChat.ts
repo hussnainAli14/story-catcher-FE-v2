@@ -40,7 +40,7 @@ const findVideoInsertionIndex = (messages: ChatMessage[]): number => {
   // Find storyboard message index
   const storyboardIndex = messages.findIndex(msg =>
     msg.type === 'assistant' &&
-    msg.message.includes('**Storyboard:') &&
+    (msg.message.includes('**Storyboard:') || msg.message.includes('**Your video will be ready')) &&
     !msg.isLoading
   );
 
@@ -318,7 +318,7 @@ export const useStoryChat = () => {
     // Find storyboard message index
     const storyboardIndex = state.messages.findIndex(msg =>
       msg.type === 'assistant' &&
-      msg.message.includes('**Storyboard:') &&
+      (msg.message.includes('**Storyboard:') || msg.message.includes('**Your video will be ready')) &&
       !msg.isLoading
     );
 
@@ -460,7 +460,7 @@ export const useStoryChat = () => {
   useEffect(() => {
     const storyboardReady = state.messages.some(msg =>
       msg.type === 'assistant' &&
-      msg.message.includes('**Storyboard:') &&
+      (msg.message.includes('**Storyboard:') || msg.message.includes('**Your video will be ready')) &&
       !msg.isLoading
     );
 
