@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { ChatBoxProps } from './types'
 import Storyboard from './Storyboard'
 
-const ChatBox = ({ 
-    message, 
-    type="assistant", 
-    isLoading, 
-    isError, 
+const ChatBox = ({
+    message,
+    type = "assistant",
+    isLoading,
+    isError,
     images,
-    videoUrl, 
+    videoUrl,
     videoHistory,
     isEditable = false,
     isEditing = false,
@@ -18,7 +18,7 @@ const ChatBox = ({
     videoGenerating = false
 }: ChatBoxProps) => {
     const [editText, setEditText] = useState(message);
-    
+
     // Update editText when message changes or when editing starts
     React.useEffect(() => {
         if (isEditing) {
@@ -33,13 +33,13 @@ const ChatBox = ({
         if (isLoading) {
             return "bg-gray-100 border border-gray-300 text-gray-600";
         }
-        return type === "user" 
-            ? "bg-flash-white rounded-xl rounded-tl-none" 
+        return type === "user"
+            ? "bg-flash-white rounded-xl rounded-tl-none"
             : "bg-alabster rounded-xl rounded-tr-none";
     };
 
     // Check if the message contains a storyboard
-    const isStoryboard = message.includes('**Storyboard:') && message.includes('**Scene');
+    const isStoryboard = (message.includes('**Your video will be ready') || message.includes('**Storyboard:')) && message.includes('**Scene');
 
     const handleSave = () => {
         if (onEdit) {
@@ -64,7 +64,7 @@ const ChatBox = ({
 
     return (
         <div className={`flex w-full md:max-w-1/2 px-4 py-2 ${getBoxStyles()} font-space-mono text-forest ${isEditable && !isEditing ? 'cursor-pointer hover:bg-gray-50' : ''}`}
-             onClick={isEditable && !isEditing ? onStartEdit : undefined}>
+            onClick={isEditable && !isEditing ? onStartEdit : undefined}>
             {isLoading ? (
                 <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
@@ -97,12 +97,12 @@ const ChatBox = ({
                 </div>
             ) : isStoryboard ? (
                 <div className="w-full relative group">
-                    <Storyboard 
-                        content={message} 
-                        images={images} 
-                        videoUrl={videoUrl} 
+                    <Storyboard
+                        content={message}
+                        images={images}
+                        videoUrl={videoUrl}
                         videoHistory={videoHistory}
-                        videoGenerating={videoGenerating} 
+                        videoGenerating={videoGenerating}
                     />
                     {isEditable && !videoGenerating && (
                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -122,10 +122,10 @@ const ChatBox = ({
             ) : videoUrl ? (
                 <div className="w-full">
                     <div className="mb-3">{message}</div>
-                    <Storyboard 
-                        content="" 
-                        images={images} 
-                        videoUrl={videoUrl} 
+                    <Storyboard
+                        content=""
+                        images={images}
+                        videoUrl={videoUrl}
                         videoHistory={videoHistory}
                     />
                 </div>
