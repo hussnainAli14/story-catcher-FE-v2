@@ -36,10 +36,19 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
         handleClose();
     }
 
+    const handleDismiss = () => {
+        if (step === 'email') {
+            // If skipping email, skip 'thank-you' and go straight to 'instructions'
+            setStep('instructions');
+        } else {
+            handleClose();
+        }
+    }
+
     return (
         <div className='fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50'>
             <div className='bg-white sm:px-6 px-4 py-10 shadow-lg max-w-lg w-full mx-4 rounded-xl flex flex-col gap-6 relative'>
-                <button className='absolute top-2 right-4 text-gray-500 hover:text-gray-700 text-4xl cursor-pointer' onClick={handleClose}>×</button>
+                <button className='absolute top-2 right-4 text-gray-500 hover:text-gray-700 text-4xl cursor-pointer' onClick={handleDismiss}>×</button>
 
                 {step === 'email' && (
                     <>

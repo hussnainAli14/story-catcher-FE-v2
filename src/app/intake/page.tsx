@@ -89,7 +89,8 @@ const Intake = () => {
     const handleEmailCapture = async (email?: string) => {
         // Store email - it will be used when video finishes generating
         storeEmail(email);
-        closeEmailPopup();
+        // Don't close popup here - let the popup handle its own flow
+        // closeEmailPopup();
     };
 
     const getPlaceholderText = () => {
