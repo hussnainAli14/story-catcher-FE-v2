@@ -236,32 +236,24 @@ const Storyboard: React.FC<StoryboardProps> = ({
             🎬 {title}
           </h2>
           {subtitle && (
-            <p className="text-sm text-gray-600 mt-1 italic">{subtitle}</p>
+            <p className="text-md text-gray-600 mt-1 italic">{subtitle}</p>
           )}
         </div>
 
-        {/* Editing Instructions */}
-        <div className={`mb-4 p-3 border rounded-lg ${videoGenerating
-          ? 'bg-orange-50 border-orange-200'
-          : 'bg-blue-50 border-blue-200'
-          }`}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className={videoGenerating ? 'text-orange-600' : 'text-blue-600'}>
-              {videoGenerating ? '⏳' : '✏️'}
-            </span>
-            <h3 className={`text-sm font-semibold ${videoGenerating ? 'text-orange-800' : 'text-blue-800'
-              }`}>
-              {videoGenerating ? 'Video Generation in Progress' : 'You can edit your storyboard!'}
-            </h3>
+        {/* Editing Instructions - Only show when video is generating */}
+        {videoGenerating && (
+          <div className="mb-4 p-3 border rounded-lg bg-orange-50 border-orange-200">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-orange-600">⏳</span>
+              <h3 className="text-sm font-semibold text-orange-800">
+                Video Generation in Progress
+              </h3>
+            </div>
+            <p className="text-xs text-orange-700">
+              Editing is disabled while your video is being generated. You can edit after the video is complete or start a new story.
+            </p>
           </div>
-          <p className={`text-xs ${videoGenerating ? 'text-orange-700' : 'text-blue-700'
-            }`}>
-            {videoGenerating
-              ? 'Editing is disabled while your video is being generated. You can edit after the video is complete or start a new story.'
-              : 'Click the edit button (✏️) that appears when you hover over the storyboard to make changes and generate new videos.'
-            }
-          </p>
-        </div>
+        )}
 
         {/* Scene content - Clean layout */}
         <div className="space-y-4">

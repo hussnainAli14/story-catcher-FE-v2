@@ -72,7 +72,7 @@ const ChatBox = ({
             {isLoading ? (
                 <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                    <span>Generating your story...</span>
+                    <span>Your video is generating...</span>
                 </div>
             ) : isEditing ? (
                 <div className="w-full space-y-3">
@@ -95,7 +95,7 @@ const ChatBox = ({
                             onClick={handleSave}
                             className="px-4 py-2 text-sm bg-forest text-white rounded hover:bg-green-700 transition-colors"
                         >
-                            Save
+                            {isStoryboard ? "Save and Generate New Video" : "Save"}
                         </button>
                     </div>
                 </div>

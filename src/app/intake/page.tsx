@@ -93,6 +93,20 @@ const Intake = () => {
         // closeEmailPopup();
     };
 
+    const handleEditMessage = (index: number, newMessage: string) => {
+        // 1. Update local state
+        editMessage(index, newMessage);
+
+        // 2. Check if it's a storyboard message
+        // We check the new message content for storyboard markers
+        const isStoryboard = (newMessage.includes('**Your video will be ready') || newMessage.includes('**Storyboard:')) && newMessage.includes('**Scene');
+
+        if (isStoryboard) {
+            // Trigger generation immediately with the new text
+            generateVideo(undefined, newMessage);
+        }
+    };
+
     const getPlaceholderText = () => {
         if (isComplete) return "Your story is complete!";
         if (isLoading) {
@@ -134,7 +148,7 @@ const Intake = () => {
 
                     <Chat
                         messages={messages}
-                        onEditMessage={editMessage}
+                        onEditMessage={handleEditMessage}
                         onStartEditing={startEditing}
                         onCancelEditing={cancelEditing}
                         onStartNewStory={handleReset}

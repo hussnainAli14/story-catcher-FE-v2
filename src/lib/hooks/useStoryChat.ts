@@ -259,8 +259,9 @@ export const useStoryChat = () => {
               // Remove the loading message and insert completed video at correct position
               setState(prev => {
                 // Remove the loading message (find the one with matching videogen URL)
+                // AND remove any previous video messages (so only the latest one shows)
                 const messagesWithoutLoading = prev.messages.filter(msg =>
-                  !(msg.videoUrl === videoUrl && msg.isLoading)
+                  !(msg.videoUrl === videoUrl && msg.isLoading) && !msg.videoUrl
                 );
 
                 // Find insertion point (right after storyboard)
@@ -271,8 +272,8 @@ export const useStoryChat = () => {
                   id: crypto.randomUUID(),
                   type: 'assistant',
                   message: supabaseSaveSuccess
-                    ? 'Your video is ready! (Saved permanently)'
-                    : 'Your video is ready! (Note: Video saved locally but could not be stored permanently)',
+                    ? 'Your video is ready! - A link has been sent to your email address'
+                    : 'Your video is ready! - A link has been sent to your email address',
                   videoUrl: finalVideoUrl,
                   permanentUrl: permanentUrl,
                   downloadUrl: downloadUrl,
@@ -314,7 +315,7 @@ export const useStoryChat = () => {
   }, [state.sessionId, state.hasEmailForSupabase, state.email]);
 
   // Generate video from completed session (from Generate Video button)
-  const generateVideo = useCallback(async (email?: string) => {
+  const generateVideo = useCallback(async (email?: string, overrideStoryboardText?: string) => {
     if (!state.sessionId) return;
 
     // Use provided email only (don't fall back to stored/stale email)
@@ -329,9 +330,11 @@ export const useStoryChat = () => {
       !msg.isLoading
     );
 
-    if (storyboardIndex === -1) return;
-    const storyboardMsg = state.messages[storyboardIndex];
-    const storyboardMessageText = storyboardMsg.message;
+    if (storyboardIndex === -1 && !overrideStoryboardText) return;
+    const storyboardMsg = storyboardIndex !== -1 ? state.messages[storyboardIndex] : null;
+    const storyboardMessageText = overrideStoryboardText || (storyboardMsg ? storyboardMsg.message : '');
+
+    if (!storyboardMessageText) return;
 
     // Disable editing during generation
     setState(prev => {
@@ -369,7 +372,7 @@ export const useStoryChat = () => {
     try {
       // Check if storyboard was edited and use the latest text
       let result;
-      if (storyboardMessageText) {
+      if (overrideStoryboardText || (storyboardMsg && storyboardMsg.message !== storyboardMessageText)) {
         // User edited the storyboard - use the edited text
         console.log('Using edited storyboard for video generation');
         result = await storyAPI.generateVideoFromEditedStoryboard(storyboardMessageText, state.sessionId, emailToUse || undefined);
@@ -407,7 +410,8 @@ export const useStoryChat = () => {
           // Direct video URL, show immediately at correct position (below storyboard)
           setState(prev => {
             // Remove the loading message (last one)
-            const messagesWithoutLoading = prev.messages.slice(0, -1);
+            // AND remove any previous video messages
+            const messagesWithoutLoading = prev.messages.slice(0, -1).filter(msg => !msg.videoUrl);
 
             // Find insertion point (right after storyboard)
             const insertIndex = findVideoInsertionIndex(messagesWithoutLoading);
