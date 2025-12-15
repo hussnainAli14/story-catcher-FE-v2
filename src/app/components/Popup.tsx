@@ -65,7 +65,7 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                                 </div>
                             )}
 
-                            <p className='text-sm text-slate text-center italic font-medium'>
+                            <p className='text-md text-slate text-center italic font-medium'>
                                 This is kept totally private we will never sell nor spam
                             </p>
                         </div>
