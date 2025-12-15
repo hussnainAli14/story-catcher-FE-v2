@@ -167,9 +167,9 @@ const Intake = () => {
                         />
                     </div>
 
-                    {isComplete && (
+                    {/* {isComplete && (
                         <div className="mt-6 text-center space-y-4">
-                            {/* {showGenerateButton && !videoGenerating && (
+                            {showGenerateButton && !videoGenerating && (
                                 <button
                                     onClick={handleGenerateVideo}
                                     disabled={videoGenerating}
@@ -177,7 +177,7 @@ const Intake = () => {
                                 >
                                     Generate Video
                                 </button>
-                            )} */}
+                            )}
                             <button
                                 onClick={handleReset}
                                 className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-space-mono"
@@ -185,7 +185,7 @@ const Intake = () => {
                                 Start New Story
                             </button>
                         </div>
-                    )}
+                    )} */}
                 </div>
             </div>
         </ErrorBoundary>
