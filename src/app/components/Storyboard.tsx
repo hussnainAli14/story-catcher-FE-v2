@@ -34,11 +34,24 @@ const Storyboard: React.FC<StoryboardProps> = ({
   // Function to download video
   const downloadVideo = async (url: string) => {
     // Prefer downloadUrl if available (it has Content-Disposition: attachment), then permanentUrl, then url
+    // Prefer downloadUrl if available (it has Content-Disposition: attachment), then permanentUrl, then url
     let targetUrl = url;
+
+    // If we have a specific download URL (signed with attachment header), use it directly
+    // This bypasses CORS issues with fetch/blob
+    if (downloadUrl) {
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      // No need for download attribute as Content-Disposition handles it, but adding it as hint
+      link.download = `story-video-${Date.now()}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
     if (url === videoUrl) {
-      if (downloadUrl) {
-        targetUrl = downloadUrl;
-      } else if (permanentUrl) {
+      if (permanentUrl) {
         targetUrl = permanentUrl;
       }
     }
@@ -66,9 +79,30 @@ const Storyboard: React.FC<StoryboardProps> = ({
       window.URL.revokeObjectURL(downloadUrl);
 
     } catch (error) {
-      console.error('Error downloading video via blob, falling back to direct link:', error);
-      // Fallback: try to open in new tab which might trigger download or play
-      window.open(targetUrl, '_blank');
+      console.error('Error downloading video via blob, falling back to proxy:', error);
+
+      // Fallback: Use backend proxy to avoid CORS
+      try {
+        // Construct proxy URL
+        // We assume the backend is at the same base URL as the API
+        // Since we don't have direct access to API_BASE_URL here, we'll try to deduce it or use a relative path if proxied
+        // But for now, let's try to use the environment variable or default
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const proxyUrl = `${apiBase}/video/proxy-download?url=${encodeURIComponent(targetUrl)}`;
+
+        console.log('Attempting proxy download via:', proxyUrl);
+
+        const link = document.createElement('a');
+        link.href = proxyUrl;
+        link.download = `story-video-${Date.now()}.mp4`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (proxyError) {
+        console.error('Proxy download failed:', proxyError);
+        // Final fallback: just open in new tab
+        window.open(targetUrl, '_blank');
+      }
     }
   };
 
