@@ -11,6 +11,10 @@ const getApiBaseUrl = (): string => {
 
   // Auto-detect based on environment
   if (isDevelopment) {
+    // In browser environment, use the current hostname but port 5000
+    if (typeof window !== 'undefined') {
+      return `http://${window.location.hostname}:5000/api`;
+    }
     return 'http://localhost:5000/api';
   }
 
@@ -18,7 +22,7 @@ const getApiBaseUrl = (): string => {
   return 'https://story-catcher-backend-v2.onrender.com/api';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
 
 export interface StorySession {
   session_id: string;
