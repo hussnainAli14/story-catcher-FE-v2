@@ -126,9 +126,14 @@ const Intake = () => {
                 <Header />
                 <div className='flex-1 sm:px-20 px-5 pb-10 overflow-y-auto scrollbar-hide'>
                     <div className="flex flex-col items-center gap-4 py-10">
-                        <h1 className='text-3xl font-bold text-center font-tektur text-forest'>
-                            Start your story interview
-                        </h1>
+                        <div className="text-center mb-2">
+                            <h1 className='text-4xl font-serif font-bold text-black mb-1'>
+                                Start Your Story Interview
+                            </h1>
+                            <p className='text-lg text-gray-700 font-serif'>
+                                your story stays private unless you choose to share it
+                            </p>
+                        </div>
                         <div className="flex items-center gap-4">
                             {error && (
                                 <button
@@ -165,27 +170,14 @@ const Intake = () => {
                             onClick={handleSubmit}
                             disabled={isLoading || isComplete}
                         />
+                        {videoGenerated && (
+                            <div className="text-center mt-4">
+                                <p className="text-gray-600 font-light text-sm font-sans">
+                                    A gift to you from <a href="https://numina.team" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">Numina.team</a>
+                                </p>
+                            </div>
+                        )}
                     </div>
-
-                    {/* {isComplete && (
-                        <div className="mt-6 text-center space-y-4">
-                            {showGenerateButton && !videoGenerating && (
-                                <button
-                                    onClick={handleGenerateVideo}
-                                    disabled={videoGenerating}
-                                    className="px-6 py-2 bg-forest text-white rounded-lg hover:bg-green-700 transition-colors font-space-mono disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Generate Video
-                                </button>
-                            )}
-                            <button
-                                onClick={handleReset}
-                                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-space-mono"
-                            >
-                                Start New Story
-                            </button>
-                        </div>
-                    )} */}
                 </div>
             </div>
         </ErrorBoundary>
