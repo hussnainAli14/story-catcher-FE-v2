@@ -65,7 +65,7 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                                 </div>
                             )}
 
-                            <p className='text-md text-slate text-center italic font-medium'>
+                            <p className='text-lg text-center font-medium'>
                                 This is kept totally private we will never sell nor spam
                             </p>
                         </div>
@@ -85,15 +85,23 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                         <div className='text-center space-y-4'>
                             <h1 className='text-2xl font-poppins font-bold text-forest'>Thank you!</h1>
 
-                            <div className="space-y-4 text-left bg-green-50 p-4 rounded-lg border border-green-100">
+                            <div className="space-y-4 text-left p-4 text-md sm:text-xl">
                                 <p className="text-gray-700">
-                                    Your video will be anonymous.
+                                    Your story stays private
+                                    unless you choose to share it. .
                                 </p>
                                 <p className="text-gray-700">
-                                    Each month we will select the most moving <strong>Moment of Realization</strong> video.
+                                    If you choose, you can enter your
+                                    story on the <strong>
+                                        Moments of Realization
+                                    </strong> YouTube channel.
                                 </p>
                                 <p className="text-gray-700">
-                                    If you choose, we will publish these on the Moments of Realization channel winning entries are guaranteed <strong>10,000 views</strong>.
+                                    Each month we will select the <strong>
+                                        most
+                                        moving video</strong>. Winning entries are
+                                    guaranteed <strong>
+                                        10,000 views</strong>.
                                 </p>
                             </div>
                         </div>
@@ -110,18 +118,25 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                 {step === 'instructions' && (
                     <>
                         <div className='text-center space-y-4'>
-                            <h1 className='text-xl font-poppins font-bold text-forest'>What happens next?</h1>
+                            <h1 className='text-2xl font-poppins font-bold text-forest'>What happens next?</h1>
 
-                            <div className="space-y-3 text-left bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <div className="space-y-3 text-left p-4 text-md sm:text-xl">
                                 <p className="text-gray-700">
-                                    Your video will appear below very shortly.
+                                    Your video will appear <b>below</b> very shortly.
                                 </p>
                                 <p className="text-gray-700">
-                                    Please view the video.
+                                    Please <b>view the video</b>.
                                 </p>
                                 <p className="text-gray-700">
-                                    If you choose, then you can edit the script and generate a revised video.
+                                    If you choose, then you can <b>edit the script</b> and generate a revised video.
                                 </p>
+
+                                {step === 'instructions' && (
+                                    <p className="text-gray-700">
+                                        Check the <strong>
+                                            email inbox</strong> for personal copy.
+                                    </p>
+                                )}
                             </div>
                         </div>
 

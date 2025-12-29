@@ -281,7 +281,7 @@ const Storyboard: React.FC<StoryboardProps> = ({
         </div>
 
         {/* Editing Instructions - Only show when video is generating */}
-        {videoGenerating && (
+        {/* {videoGenerating && (
           <div className="mb-4 p-3 border rounded-lg bg-orange-50 border-orange-200">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-orange-600">⏳</span>
@@ -293,7 +293,7 @@ const Storyboard: React.FC<StoryboardProps> = ({
               Editing is disabled while your video is being generated. You can edit after the video is complete or start a new story.
             </p>
           </div>
-        )}
+        )} */}
 
         {/* Scene content - Clean layout */}
         <div className="space-y-4">

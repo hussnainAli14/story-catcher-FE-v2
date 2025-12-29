@@ -9,10 +9,10 @@ const Header = () => {
                     <span className="text-xs font-light">by Numina</span>
                 </div>
             </div>
-            <div className="text-lg font-light italic opacity-80 hidden md:block">
+            <div className="text-2xl font-light italic opacity-80 hidden md:block">
                 Visualize Your Moment of Realization
             </div>
-        </header>
+        </header >
     )
 }
 
