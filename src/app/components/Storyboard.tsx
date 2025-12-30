@@ -276,7 +276,13 @@ const Storyboard: React.FC<StoryboardProps> = ({
             🎬 {title}
           </h2>
           {subtitle && (
-            <p className="text-md text-gray-600 mt-1 italic">{subtitle}</p>
+            <p className="text-md text-gray-600 mt-1">
+              {subtitle
+                .replace('script you', 'script. You')
+                .replace('later', 'later.')
+                .replace('video is below', 'video is below.')
+              }
+            </p>
           )}
         </div>
 

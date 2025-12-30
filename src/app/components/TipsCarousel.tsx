@@ -5,15 +5,15 @@ interface TipsCarouselProps {
 }
 
 const EARLY_LOOP = [
-    "Your video will be ready in about 1 minute",
-    "Meanwhile, the script for your video is below",
-    "Take a few seconds to read the script you will be able to edit later"
+    "Your video will be ready in about 1 minute.",
+    "Meanwhile, the script for your video is below.",
+    "Take a few seconds to read the script. You will be able to edit later."
 ];
 
 const LATE_LOOP = [
-    "The script for your video is below",
-    "Take a few seconds to read the script you will be able to edit later",
-    "Your video will appear below very shortly",
+    "The script for your video is below.",
+    "Take a few seconds to read the script. You will be able to edit later.",
+    "Your video will appear below very shortly.",
     "If you choose, then you can edit the script",
     "And generate a revised video"
 ];

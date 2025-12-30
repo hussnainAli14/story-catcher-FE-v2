@@ -172,7 +172,7 @@ const Intake = () => {
                         />
                         {videoGenerated && (
                             <div className="text-center mt-4">
-                                <p className="text-gray-600 font-light text-sm font-sans">
+                                <p className="text-gray-600 font-light text-lg font-sans">
                                     A gift to you from <a href="https://numina.team" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">Numina.team</a>
                                 </p>
                             </div>

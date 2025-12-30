@@ -52,8 +52,8 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
 
                 {step === 'email' && (
                     <>
-                        <div className='text-center space-y-2'>
-                            <h1 className='text-xl font-poppins font-bold text-forest'>Your video will be sent to your email address</h1>
+                        <div className='text-left space-y-2'>
+                            <h1 className='text-xl font-poppins font-bold text-forest'>Your video will be sent to your email address:</h1>
                         </div>
 
                         <div className="space-y-4">
@@ -65,8 +65,10 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                                 </div>
                             )}
 
-                            <p className='text-lg text-center font-medium'>
-                                This is kept totally private we will never sell nor spam
+                            <p className='text-lg justify-left font-medium'>
+                                This is kept totally private
+                                <br />
+                                We will never sell or spam.
                             </p>
                         </div>
 
@@ -82,13 +84,13 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
 
                 {step === 'thank-you' && (
                     <>
-                        <div className='text-center space-y-4'>
-                            <h1 className='text-2xl font-poppins font-bold text-forest'>Thank you!</h1>
+                        <div className='text-left space-y-4'>
 
                             <div className="space-y-4 text-left p-4 text-md sm:text-xl">
                                 <p className="text-gray-700">
+                                    <strong>Thank you! </strong>
                                     Your story stays private
-                                    unless you choose to share it. .
+                                    unless you choose to share it.
                                 </p>
                                 <p className="text-gray-700">
                                     If you choose, you can enter your
@@ -117,8 +119,8 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
 
                 {step === 'instructions' && (
                     <>
-                        <div className='text-center space-y-4'>
-                            <h1 className='text-2xl font-poppins font-bold text-forest'>What happens next?</h1>
+                        <div className='text-left space-y-4'>
+                            <h1 className='text-2xl font-poppins font-bold text-forest px-4'>What happens next?</h1>
 
                             <div className="space-y-3 text-left p-4 text-md sm:text-xl">
                                 <p className="text-gray-700">
@@ -133,8 +135,8 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
 
                                 {step === 'instructions' && (
                                     <p className="text-gray-700">
-                                        Check the <strong>
-                                            email inbox</strong> for personal copy.
+                                        Check your <strong>
+                                            email inbox</strong> for your personal copy.
                                     </p>
                                 )}
                             </div>
