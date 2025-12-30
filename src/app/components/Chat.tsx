@@ -41,10 +41,17 @@ const Chat = ({
         // Check if the last message is a storyboard (and not loading)
         const lastMessageIndex = messages.length - 1;
         const lastMessage = messages[lastMessageIndex];
-        const isStoryboardReady = lastMessage &&
+
+        // More robust check for storyboard message
+        const isStoryboard = lastMessage &&
             lastMessage.type === 'assistant' &&
-            (lastMessage.message.includes('**Storyboard:') || lastMessage.message.includes('**Your video will be ready')) &&
-            !lastMessage.isLoading;
+            (
+                lastMessage.message.includes('Storyboard:') ||
+                lastMessage.message.includes('Your video will be ready') ||
+                lastMessage.message.includes('Scene 1')
+            );
+
+        const isStoryboardReady = isStoryboard && !lastMessage.isLoading;
 
         if (scrollToIndex !== -1) {
             // Scroll to the newly completed video
@@ -54,22 +61,29 @@ const Chat = ({
                     videoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     // Mark this video as scrolled to
                     scrolledToVideos.current.add(scrollToIndex);
-                }, 100); // Small delay to ensure DOM is updated
-            }
-        } else if (isStoryboardReady) {
-            // If storyboard is ready, scroll to the message BEFORE it (the "Thank you" message)
-            // or to the top of the storyboard if no previous message
-            const targetIndex = lastMessageIndex > 0 ? lastMessageIndex - 1 : lastMessageIndex;
-            const targetElement = videoRefs.current.get(targetIndex);
-
-            if (targetElement) {
-                setTimeout(() => {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
             }
+        } else if (isStoryboardReady) {
+            // If storyboard is ready, scroll to the top of the storyboard message
+            const targetElement = videoRefs.current.get(lastMessageIndex);
+
+            if (targetElement) {
+                // Use a slightly longer timeout to ensure render is complete
+                // and use 'start' block to align to top
+                setTimeout(() => {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 150);
+            }
         } else if (chatEndRef.current) {
-            // Otherwise scroll to bottom for regular messages
-            // Only scroll if we didn't just scroll to storyboard
+            // Only scroll to bottom if it's NOT a storyboard that is ready
+            // If it IS a storyboard but still loading, we might want to scroll to bottom (streaming),
+            // but once ready, we definitely want top.
+            // If we are here, isStoryboardReady is false.
+
+            // Optional: if it's a storyboard and loading, maybe we don't want to auto-scroll 
+            // if the user is trying to read? But usually streaming requires following.
+            // For now, standard behavior for loading messages.
+
             chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
