@@ -53,6 +53,16 @@ const Chat = ({
 
         const isStoryboardReady = isStoryboard && !lastMessage.isLoading;
 
+        // Check if there is ANY storyboard message in the history
+        const existingStoryboardIndex = messages.findIndex(msg =>
+            msg.type === 'assistant' &&
+            (
+                msg.message.includes('Storyboard:') ||
+                msg.message.includes('Your video will be ready') ||
+                msg.message.includes('Scene 1')
+            )
+        );
+
         if (scrollToIndex !== -1) {
             // Scroll to the newly completed video
             const videoElement = videoRefs.current.get(scrollToIndex);
@@ -63,27 +73,41 @@ const Chat = ({
                     scrolledToVideos.current.add(scrollToIndex);
                 }, 100);
             }
-        } else if (isStoryboardReady) {
-            // If storyboard is ready, scroll to the top of the storyboard message
+        } else if (isStoryboard) {
+            // If the LAST message is a storyboard (loading or not), scroll to TOP of it
             const targetElement = videoRefs.current.get(lastMessageIndex);
-
             if (targetElement) {
-                // Use a slightly longer timeout to ensure render is complete
-                // and use 'start' block to align to top
                 setTimeout(() => {
                     targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 150);
             }
+        } else if (existingStoryboardIndex !== -1) {
+            // If a storyboard exists in history, we want to stay focused on it
+            // UNLESS the new message is a user message (user typing) or an error
+            // But if it's "Your video is generating...", we want to stay on storyboard
+
+            // If the last message is "Your video is generating...", scroll to storyboard top
+            if (lastMessage && lastMessage.message.includes('Your video is generating')) {
+                const targetElement = videoRefs.current.get(existingStoryboardIndex);
+                if (targetElement) {
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
+                }
+            } else {
+                // For other messages (like user input), standard behavior?
+                // Actually, if user is typing, we might want to see input.
+                // But the user request specifically mentioned "Your video is generating..." causing scroll.
+
+                // Let's only prevent scroll if it's that specific message, otherwise default behavior
+                // or if we want to be safe, if storyboard exists, always prioritize it unless user action?
+
+                // Current decision: If "Your video is generating...", force scroll to storyboard top.
+                // Otherwise, default scroll to bottom (e.g. for user messages).
+                chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
         } else if (chatEndRef.current) {
-            // Only scroll to bottom if it's NOT a storyboard that is ready
-            // If it IS a storyboard but still loading, we might want to scroll to bottom (streaming),
-            // but once ready, we definitely want top.
-            // If we are here, isStoryboardReady is false.
-
-            // Optional: if it's a storyboard and loading, maybe we don't want to auto-scroll 
-            // if the user is trying to read? But usually streaming requires following.
-            // For now, standard behavior for loading messages.
-
+            // Only scroll to bottom for regular messages if no storyboard exists
             chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
