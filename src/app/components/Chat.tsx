@@ -7,7 +7,6 @@ const Chat = ({
     onEditMessage,
     onStartEditing,
     onCancelEditing,
-    videoGenerated = false,
     videoGenerating = false,
     onStartNewStory
 }: ChatProps) => {
@@ -50,8 +49,6 @@ const Chat = ({
                 lastMessage.message.includes('Your video will be ready') ||
                 lastMessage.message.includes('Scene 1')
             );
-
-        const isStoryboardReady = isStoryboard && !lastMessage.isLoading;
 
         // Check if there is ANY storyboard message in the history
         const existingStoryboardIndex = messages.findIndex(msg =>
@@ -104,7 +101,9 @@ const Chat = ({
 
                 // Current decision: If "Your video is generating...", force scroll to storyboard top.
                 // Otherwise, default scroll to bottom (e.g. for user messages).
-                chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+                if (chatEndRef.current) {
+                    chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
             }
         } else if (chatEndRef.current) {
             // Only scroll to bottom for regular messages if no storyboard exists
