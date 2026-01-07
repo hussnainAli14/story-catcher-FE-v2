@@ -68,7 +68,7 @@ const Popup = ({ handleClose, onGenerateVideo }: PopupProps) => {
                             <p className='text-lg justify-left font-medium'>
                                 This is kept totally private
                                 <br />
-                                We will never sell or spam.
+                                We will never sell or spam
                             </p>
                         </div>
 
